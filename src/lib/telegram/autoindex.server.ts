@@ -66,7 +66,7 @@ export async function indexChannelPost(
   const { data: byMessage } = await supabaseAdmin
     .from("movies").select("id")
     .eq("storage_chat_id", chatId)
-    .eq("storage_message_id", msg.message_id)
+    .eq("storage_message_id", messageId)
     .maybeSingle();
 
   if (!isEdit && !byMessage) {
@@ -104,7 +104,7 @@ export async function indexChannelPost(
     language,
     quality,
     storage_chat_id: chatId,
-    storage_message_id: msg.message_id,
+    storage_message_id: messageId,
     tmdb_id: verified?.tmdb_id ?? null,
     imdb_id: verified?.imdb_id ?? null,
     original_title: verified?.original_title ?? null,
