@@ -90,6 +90,8 @@ function StoragePage() {
         </div>
       </Card>
 
+      <ScanCard />
+
       <Card className="p-5">
         <h2 className="font-semibold mb-3">Per-bot storage access</h2>
         <div className="space-y-2">
