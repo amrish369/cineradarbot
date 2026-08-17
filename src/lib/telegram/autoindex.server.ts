@@ -37,14 +37,19 @@ function extractFile(msg: any): { file_id: string; file_size: number | null; fil
  * Index (or refresh) one storage-channel post as a movie row.
  * Only runs for the configured storage channel and when auto-index is ON.
  */
-export async function indexChannelPost(msg: any, isEdit = false): Promise<IndexResult> {
+export async function indexChannelPost(
+  msg: any,
+  isEdit = false,
+  opts: { force?: boolean; chatId?: number; messageId?: number } = {},
+): Promise<IndexResult> {
   const s = await getSettings();
-  if (!s.auto_index) return { status: "skipped", reason: "auto-index off" };
+  if (!s.auto_index && !opts.force) return { status: "skipped", reason: "auto-index off" };
 
-  const chatId = Number(msg?.chat?.id);
+  const chatId = Number(opts.chatId ?? msg?.chat?.id);
   if (!Number.isFinite(chatId) || chatId !== Number(s.storage_channel_id)) {
     return { status: "skipped", reason: "not storage channel" };
   }
+  const messageId = Number(opts.messageId ?? msg?.message_id);
 
   const file = extractFile(msg);
   if (!file) return { status: "skipped", reason: "no video/document" };
@@ -61,7 +66,7 @@ export async function indexChannelPost(msg: any, isEdit = false): Promise<IndexR
   const { data: byMessage } = await supabaseAdmin
     .from("movies").select("id")
     .eq("storage_chat_id", chatId)
-    .eq("storage_message_id", msg.message_id)
+    .eq("storage_message_id", messageId)
     .maybeSingle();
 
   if (!isEdit && !byMessage) {
@@ -99,7 +104,7 @@ export async function indexChannelPost(msg: any, isEdit = false): Promise<IndexR
     language,
     quality,
     storage_chat_id: chatId,
-    storage_message_id: msg.message_id,
+    storage_message_id: messageId,
     tmdb_id: verified?.tmdb_id ?? null,
     imdb_id: verified?.imdb_id ?? null,
     original_title: verified?.original_title ?? null,

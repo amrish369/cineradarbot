@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getStorageHealth, getAutoIndexInfo, setAutoIndex } from "@/lib/admin/admin.functions";
+import { getStorageHealth, getAutoIndexInfo, setAutoIndex, getStorageScan, startStorageScan, stopStorageScan, runStorageScanBatch } from "@/lib/admin/admin.functions";
+import { useEffect, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -90,6 +92,8 @@ function StoragePage() {
         </div>
       </Card>
 
+      <ScanCard />
+
       <Card className="p-5">
         <h2 className="font-semibold mb-3">Per-bot storage access</h2>
         <div className="space-y-2">
@@ -109,5 +113,79 @@ function StoragePage() {
         <p className="text-xs text-muted-foreground mt-3">Every bot needs admin rights in the storage channel so it can copyMessage files.</p>
       </Card>
     </div>
+  );
+}
+function ScanCard() {
+  const get = useServerFn(getStorageScan);
+  const start = useServerFn(startStorageScan);
+  const stop = useServerFn(stopStorageScan);
+  const runBatch = useServerFn(runStorageScanBatch);
+  const [from, setFrom] = useState("1");
+  const [to, setTo] = useState("");
+  const busy = useRef(false);
+  const { data: p, refetch } = useQuery({
+    queryKey: ["admin", "storage-scan"],
+    queryFn: () => get(),
+    refetchInterval: 4000,
+  });
+
+  // Drive batches from the panel while a scan is running.
+  useEffect(() => {
+    if (!p?.running || busy.current) return;
+    busy.current = true;
+    runBatch({ data: { batch: 40 } })
+      .catch((e: any) => toast.error(e?.message ?? "Scan batch failed"))
+      .finally(() => { busy.current = false; refetch(); });
+  }, [p?.running, p?.next_id]);
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="font-semibold">Scan full storage group history</h2>
+          <p className="text-xs text-muted-foreground mt-1 max-w-lg">
+            Purane saare movie files ko message-by-message read karke database me index
+            karta hai (file_id, caption, size, media type, language, quality, message id).
+            Storage channel me kuch delete/move nahi hota — sirf ek temporary copy admin
+            chat me banti hai aur turant delete ho jati hai.
+          </p>
+        </div>
+        <div className="flex items-end gap-2">
+          <div>
+            <div className="text-xs text-muted-foreground mb-1">From msg id</div>
+            <Input className="w-28" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground mb-1">To (optional)</div>
+            <Input className="w-28" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          {p?.running ? (
+            <Button variant="destructive" onClick={async () => { await stop({ data: {} } as any); toast("Scan stopped"); refetch(); }}>
+              Stop
+            </Button>
+          ) : (
+            <Button
+              onClick={async () => {
+                await start({ data: { from: Number(from) || 1, ...(to ? { to: Number(to) } : {}) } });
+                toast.success("Scan started");
+                refetch();
+              }}
+            >
+              Start scan
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-3 text-sm">
+        <div><div className="text-muted-foreground text-xs">Status</div><b>{p?.running ? "Running" : p?.finished ? "Finished" : "Idle"}</b></div>
+        <div><div className="text-muted-foreground text-xs">At message</div><b>{p?.next_id ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Indexed</div><b className="text-green-600">{p?.indexed ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Updated</div><b>{p?.updated ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Failed</div><b className="text-destructive">{p?.failed ?? 0}</b></div>
+      </div>
+      {p?.last_title && <div className="text-xs text-muted-foreground mt-2 truncate">Last: {p.last_title}</div>}
+      {p?.last_error && <div className="text-xs text-destructive mt-1 truncate">{p.last_error}</div>}
+    </Card>
   );
 }

@@ -694,3 +694,44 @@ export const drainDeleteQueue = createServerFn({ method: "POST" })
     });
     return await res.json();
   });
+// ─── Storage channel full-history scan ────────────────────
+export const getStorageScan = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.claims);
+    const { getScanProgress } = await import("@/lib/telegram/scan.server");
+    return await getScanProgress();
+  });
+
+export const startStorageScan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { from?: number; to?: number }) =>
+    z.object({ from: z.number().optional(), to: z.number().optional() }).parse(d ?? {}))
+  .handler(async ({ context, data }) => {
+    const email = await assertAdmin(context.claims);
+    const { startScan } = await import("@/lib/telegram/scan.server");
+    const { logActivity } = await import("./admin.server");
+    const p = await startScan(data);
+    await logActivity(email, "storage.scan.start", data as any);
+    return p;
+  });
+
+export const stopStorageScan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const email = await assertAdmin(context.claims);
+    const { stopScan } = await import("@/lib/telegram/scan.server");
+    const { logActivity } = await import("./admin.server");
+    const p = await stopScan();
+    await logActivity(email, "storage.scan.stop", {});
+    return p;
+  });
+
+export const runStorageScanBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { batch?: number }) => z.object({ batch: z.number().optional() }).parse(d ?? {}))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.claims);
+    const { runScanBatch } = await import("@/lib/telegram/scan.server");
+    return await runScanBatch(Math.min(120, Math.max(1, data.batch ?? 40)));
+  });
