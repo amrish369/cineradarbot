@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          admin_email: string | null
+          created_at: string
+          details: Json | null
+          id: number
+        }
+        Insert: {
+          action: string
+          admin_email?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: number
+        }
+        Update: {
+          action?: string
+          admin_email?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: number
+        }
+        Relationships: []
+      }
+      admin_allowlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: number
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: number
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: number
+        }
+        Relationships: []
+      }
       banned: {
         Row: {
           banned_at: string
@@ -29,6 +71,99 @@ export type Database = {
           banned_at?: string
           reason?: string | null
           telegram_id?: number
+        }
+        Relationships: []
+      }
+      bot_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      bot_tokens: {
+        Row: {
+          bot_username: string | null
+          created_at: string
+          enabled: boolean
+          id: number
+          is_active: boolean
+          name: string
+          notes: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          bot_username?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          is_active?: boolean
+          name: string
+          notes?: string | null
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          bot_username?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: number
+          is_active?: boolean
+          name?: string
+          notes?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      broadcast_logs: {
+        Row: {
+          admin_id: number | null
+          blocked: number
+          created_at: string
+          deleted: number
+          failed: number
+          id: number
+          message: string | null
+          success: number
+          time_ms: number
+          total: number
+        }
+        Insert: {
+          admin_id?: number | null
+          blocked?: number
+          created_at?: string
+          deleted?: number
+          failed?: number
+          id?: number
+          message?: string | null
+          success?: number
+          time_ms?: number
+          total?: number
+        }
+        Update: {
+          admin_id?: number | null
+          blocked?: number
+          created_at?: string
+          deleted?: number
+          failed?: number
+          id?: number
+          message?: string | null
+          success?: number
+          time_ms?: number
+          total?: number
         }
         Relationships: []
       }
@@ -71,6 +206,102 @@ export type Database = {
           admin_id?: number
           started_at?: string
           target_user_id?: number
+        }
+        Relationships: []
+      }
+      daily_sent_movies: {
+        Row: {
+          kind: string
+          sent_on: string
+          tmdb_id: number
+        }
+        Insert: {
+          kind: string
+          sent_on?: string
+          tmdb_id: number
+        }
+        Update: {
+          kind?: string
+          sent_on?: string
+          tmdb_id?: number
+        }
+        Relationships: []
+      }
+      delete_queue: {
+        Row: {
+          attempts: number
+          bot_id: number | null
+          chat_id: number
+          created_at: string
+          delete_at: string
+          id: number
+          last_error: string | null
+          message_id: number
+        }
+        Insert: {
+          attempts?: number
+          bot_id?: number | null
+          chat_id: number
+          created_at?: string
+          delete_at: string
+          id?: number
+          last_error?: string | null
+          message_id: number
+        }
+        Update: {
+          attempts?: number
+          bot_id?: number | null
+          chat_id?: number
+          created_at?: string
+          delete_at?: string
+          id?: number
+          last_error?: string | null
+          message_id?: number
+        }
+        Relationships: []
+      }
+      group_membership: {
+        Row: {
+          backup_joined: boolean
+          blocked: boolean
+          channel_joined: boolean
+          last_checked: string | null
+          last_error: string | null
+          last_invited: string | null
+          last_reminded: string | null
+          main_joined: boolean
+          reminder_count: number
+          started: boolean
+          telegram_id: number
+          updated_at: string
+        }
+        Insert: {
+          backup_joined?: boolean
+          blocked?: boolean
+          channel_joined?: boolean
+          last_checked?: string | null
+          last_error?: string | null
+          last_invited?: string | null
+          last_reminded?: string | null
+          main_joined?: boolean
+          reminder_count?: number
+          started?: boolean
+          telegram_id: number
+          updated_at?: string
+        }
+        Update: {
+          backup_joined?: boolean
+          blocked?: boolean
+          channel_joined?: boolean
+          last_checked?: string | null
+          last_error?: string | null
+          last_invited?: string | null
+          last_reminded?: string | null
+          main_joined?: boolean
+          reminder_count?: number
+          started?: boolean
+          telegram_id?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -176,6 +407,24 @@ export type Database = {
           data?: Json
           expires_at?: string
           key?: string
+        }
+        Relationships: []
+      }
+      pending_join_actions: {
+        Row: {
+          payload: Json
+          updated_at: string
+          user_id: number
+        }
+        Insert: {
+          payload: Json
+          updated_at?: string
+          user_id: number
+        }
+        Update: {
+          payload?: Json
+          updated_at?: string
+          user_id?: number
         }
         Relationships: []
       }
