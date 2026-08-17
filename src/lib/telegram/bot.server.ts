@@ -75,6 +75,7 @@ import {
   runMigration,
   stopMigration,
 } from "./storage.server";
+import { buildUserCaption } from "./smart-parse.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { enqueueDelete } from "./delete-queue.server";
 
@@ -839,10 +840,10 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       const mid = Number(startParam.slice(3));
       const m = Number.isFinite(mid) ? await fetchMovieById(mid) : null;
       if (m) {
-        const caption =
-          `🎬 *${escapeMarkdown(m.title)}* (${m.year || "?"})\n` +
-          `🌐 ${m.language || "N/A"} | 📺 ${m.quality || "N/A"}\n\n` +
-          `⏱️ *Auto-delete in few min — forward karke save karo.*`;
+        const caption = buildUserCaption(m as any, {
+        escape: escapeMarkdown,
+        footer: `⏱️ *Auto-delete in few min — forward karke save karo.*`,
+      });
         try {
           await sendMovieFile(ctx.api, uid, m, {
             caption,
@@ -862,10 +863,10 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       const mid = Number(startParam.slice(4));
       const m = Number.isFinite(mid) ? await fetchMovieById(mid) : null;
       if (m) {
-        const caption =
-          `🎬 *${escapeMarkdown(m.title)}* (${m.year || "?"})\n` +
-          `🌐 ${m.language || "N/A"} | 📺 ${m.quality || "N/A"}\n\n` +
-          `⏱️ *Auto-delete in 5 min — forward karke save karo.*`;
+        const caption = buildUserCaption(m as any, {
+        escape: escapeMarkdown,
+        footer: `⏱️ *Auto-delete in 5 min — forward karke save karo.*`,
+      });
         try {
           await sendMovieFile(ctx.api, uid, m, { caption, parse_mode: "Markdown", reply_markup: await withBackupKb(null, m.id) });
           // Outgoing API transformer queues the delivered file.
@@ -2042,10 +2043,10 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       if (!m) return ctx.answerCallbackQuery({ text: "❌ Movie not found", show_alert: true });
       
       await logChat(uid, "bot", `[Download] ${m.title}`);
-      const caption =
-        `🎬 *${escapeMarkdown(m.title)}* (${m.year || "?"})\n` +
-        `🌐 ${m.language || "N/A"} | 📺 ${m.quality || "N/A"}\n\n` +
-        `⏱️ *Copyright Security: Yeh file 5 min mein auto-delete ho jayegi. Forward karke save karein.*`;
+      const caption = buildUserCaption(m as any, {
+        escape: escapeMarkdown,
+        footer: `⏱️ *Copyright Security: Yeh file 5 min mein auto-delete ho jayegi. Forward karke save karein.*`,
+      });
       
       const kb = new InlineKeyboard()
         .url("⚡ 3x Fast Download ke liye Website Visit Karein", WEBSITE_URL);

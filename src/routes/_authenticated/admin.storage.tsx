@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getStorageHealth, getAutoIndexInfo, setAutoIndex, getStorageScan, startStorageScan, stopStorageScan, runStorageScanBatch } from "@/lib/admin/admin.functions";
+import { getStorageHealth, getAutoIndexInfo, setAutoIndex, getStorageScan, startStorageScan, stopStorageScan, runStorageScanBatch, getMetadataBackfill, startMetadataBackfill, stopMetadataBackfill, runMetadataBackfillBatch } from "@/lib/admin/admin.functions";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -93,6 +93,8 @@ function StoragePage() {
       </Card>
 
       <ScanCard />
+
+      <BackfillCard />
 
       <Card className="p-5">
         <h2 className="font-semibold mb-3">Per-bot storage access</h2>
@@ -186,6 +188,81 @@ function ScanCard() {
       </div>
       {p?.last_title && <div className="text-xs text-muted-foreground mt-2 truncate">Last: {p.last_title}</div>}
       {p?.last_error && <div className="text-xs text-destructive mt-1 truncate">{p.last_error}</div>}
+    </Card>
+  );
+}
+
+function BackfillCard() {
+  const get = useServerFn(getMetadataBackfill);
+  const start = useServerFn(startMetadataBackfill);
+  const stop = useServerFn(stopMetadataBackfill);
+  const runBatch = useServerFn(runMetadataBackfillBatch);
+  const busy = useRef(false);
+  const { data: b, refetch } = useQuery({
+    queryKey: ["admin", "metadata-backfill"],
+    queryFn: () => get(),
+    refetchInterval: 4000,
+  });
+
+  useEffect(() => {
+    if (!b?.running || busy.current) return;
+    busy.current = true;
+    runBatch({ data: { batch: 25 } })
+      .catch((e: any) => toast.error(e?.message ?? "Backfill batch failed"))
+      .finally(() => { busy.current = false; refetch(); });
+  }, [b?.running, b?.last_id]);
+
+  const pct = b?.total ? Math.min(100, Math.round(((b.total - (b.remaining ?? 0)) / b.total) * 100)) : 0;
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="font-semibold">Smart metadata backfill</h2>
+          <p className="text-xs text-muted-foreground mt-1 max-w-lg">
+            Purane saare indexed files ka caption/filename dobara smart parser se
+            clean hota hai — title, year, language, quality, season/episode (S01E01,
+            S01 EP 01-08 Combined, Complete Season), TMDB verification aur nayi
+            user-facing caption. Telegram files ya file_id/message_id ko kuch nahi
+            hota, sirf existing records update hote hain. Resume-safe hai.
+          </p>
+        </div>
+        <div className="flex items-end gap-2">
+          {b?.running ? (
+            <Button variant="destructive" onClick={async () => { await stop({ data: {} } as any); toast("Backfill paused"); refetch(); }}>
+              Pause
+            </Button>
+          ) : (
+            <>
+              <Button onClick={async () => { await start({ data: {} }); toast.success("Backfill resumed"); refetch(); }}>
+                {b?.last_id ? "Resume backfill" : "Start backfill"}
+              </Button>
+              <Button variant="outline" onClick={async () => { await start({ data: { reset: true } }); toast.success("Backfill restarted"); refetch(); }}>
+                Restart
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 h-2 rounded bg-muted overflow-hidden">
+        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-sm">
+        <div><div className="text-muted-foreground text-xs">Total</div><b>{b?.total ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Processed</div><b>{b?.processed ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Updated</div><b className="text-green-600">{b?.updated ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Skipped</div><b>{b?.skipped ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Failed</div><b className="text-destructive">{b?.failed ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">TMDB verified</div><b>{b?.tmdb_verified ?? 0}</b></div>
+        <div><div className="text-muted-foreground text-xs">Duplicates prevented</div><b>{b?.duplicates_prevented ?? 0}</b></div>
+      </div>
+      <div className="text-xs text-muted-foreground mt-2">
+        Status: <b>{b?.running ? "Running" : b?.finished ? "Finished" : "Idle"}</b> · resume from id {b?.last_id ?? 0} · remaining {b?.remaining ?? 0}
+      </div>
+      {b?.last_title && <div className="text-xs text-muted-foreground mt-1 truncate">Last: {b.last_title}</div>}
+      {b?.last_error && <div className="text-xs text-destructive mt-1 truncate">{b.last_error}</div>}
     </Card>
   );
 }
