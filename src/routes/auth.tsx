@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,12 +8,24 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/auth")({
-  ssr: false,
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (data.user) throw redirect({ to: "/admin" });
-  },
   component: AuthPage,
+  head: () => ({
+    meta: [
+      { title: "Admin Sign In | CineRadar Bot Panel" },
+      {
+        name: "description",
+        content:
+          "Sign in to the CineRadar bot control panel to manage the movie library, users, bots and broadcasts.",
+      },
+      { property: "og:title", content: "Admin Sign In | CineRadar Bot Panel" },
+      {
+        property: "og:description",
+        content: "Secure sign-in for the CineRadar Telegram bot control panel.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
 });
 
 function AuthPage() {
@@ -22,6 +34,13 @@ function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) navigate({ to: "/admin" });
+    });
+  }, [navigate]);
+
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
