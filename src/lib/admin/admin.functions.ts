@@ -735,3 +735,44 @@ export const runStorageScanBatch = createServerFn({ method: "POST" })
     const { runScanBatch } = await import("@/lib/telegram/scan.server");
     return await runScanBatch(Math.min(120, Math.max(1, data.batch ?? 40)));
   });
+
+// ─── Smart metadata backfill ──────────────────────────────
+export const getMetadataBackfill = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.claims);
+    const { getBackfillProgress } = await import("@/lib/telegram/backfill.server");
+    return await getBackfillProgress();
+  });
+
+export const startMetadataBackfill = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { reset?: boolean }) => z.object({ reset: z.boolean().optional() }).parse(d ?? {}))
+  .handler(async ({ context, data }) => {
+    const email = await assertAdmin(context.claims);
+    const { startBackfill } = await import("@/lib/telegram/backfill.server");
+    const { logActivity } = await import("./admin.server");
+    const p = await startBackfill(data);
+    await logActivity(email, "metadata.backfill.start", data as any);
+    return p;
+  });
+
+export const stopMetadataBackfill = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const email = await assertAdmin(context.claims);
+    const { stopBackfill } = await import("@/lib/telegram/backfill.server");
+    const { logActivity } = await import("./admin.server");
+    const p = await stopBackfill();
+    await logActivity(email, "metadata.backfill.stop", {});
+    return p;
+  });
+
+export const runMetadataBackfillBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { batch?: number }) => z.object({ batch: z.number().optional() }).parse(d ?? {}))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.claims);
+    const { runBackfillBatch } = await import("@/lib/telegram/backfill.server");
+    return await runBackfillBatch(Math.min(50, Math.max(1, data.batch ?? 25)));
+  });

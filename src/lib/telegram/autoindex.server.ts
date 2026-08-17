@@ -1,6 +1,8 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getSettings } from "./settings.server";
-import { parseCaption, qualityFromSize, humanSize } from "./caption.server";
+import { qualityFromSize, humanSize } from "./caption.server";
+import { parseSmart, buildUserCaption } from "./smart-parse.server";
+import { METADATA_VERSION } from "./backfill.server";
 import { tmdbVerify } from "./tmdb.server";
 import { buildSearchText, generateAliases } from "./search.server";
 
@@ -54,9 +56,9 @@ export async function indexChannelPost(
   const file = extractFile(msg);
   if (!file) return { status: "skipped", reason: "no video/document" };
 
-  const rawText = (msg.caption || file.file_name || "").toString();
-  const parsed = parseCaption(rawText);
-  if (!parsed.name || parsed.name.length < 2) {
+  const rawText = (msg.caption || "").toString();
+  const parsed = parseSmart(rawText, file.file_name);
+  if (!parsed.title || parsed.title.length < 2) {
     return { status: "skipped", reason: "no usable title in caption/filename" };
   }
 
@@ -78,14 +80,15 @@ export async function indexChannelPost(
   // TMDB verification (best effort)
   let verified: Awaited<ReturnType<typeof tmdbVerify>> = null;
   try {
-    verified = await tmdbVerify(parsed.name, parsed.year);
+    verified = await tmdbVerify(parsed.title, parsed.year);
   } catch (e) {
     console.error("[autoindex] tmdbVerify", (e as Error).message);
   }
 
-  const title = verified?.title || parsed.name;
-  const year = verified?.year ?? parsed.year ?? null;
+  const title = verified?.title || parsed.title;
+  const year = parsed.year ?? verified?.year ?? null;
   const language = parsed.language ?? verified?.language ?? null;
+  const contentKind = parsed.kind === "series" ? "series" : (verified?.media_type === "TV" ? "series" : "movie");
   const aliases = generateAliases(title, verified?.original_title || null);
   const search_text = buildSearchText({
     title,
@@ -118,6 +121,22 @@ export async function indexChannelPost(
     search_text,
     tmdb_verified: !!verified,
     auto_indexed: true,
+    content_kind: contentKind,
+    season: parsed.season,
+    episode_start: parsed.episode_start,
+    episode_end: parsed.episode_end,
+    is_combined: parsed.combined,
+    raw_caption: rawText ? rawText.slice(0, 2000) : (file.file_name ?? null),
+    metadata_version: METADATA_VERSION,
+    clean_caption: buildUserCaption({
+      title, year, language, quality,
+      content_kind: contentKind,
+      season: parsed.season,
+      episode_start: parsed.episode_start,
+      episode_end: parsed.episode_end,
+      is_combined: parsed.combined,
+      file_size: file.file_size,
+    }),
   };
 
   // Existing row for this exact post → update it.

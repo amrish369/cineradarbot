@@ -311,21 +311,29 @@ export type Database = {
           aliases: string[] | null
           auto_indexed: boolean
           backdrop_url: string | null
+          clean_caption: string | null
+          content_kind: string | null
           created_at: string
+          episode_end: number | null
+          episode_start: number | null
           file_id: string
           file_kind: string
           file_size: number | null
           genres: string | null
           id: number
           imdb_id: string | null
+          is_combined: boolean
           language: string | null
           media_type: string | null
+          metadata_version: number
           original_title: string | null
           overview: string | null
           poster_url: string | null
           quality: string | null
+          raw_caption: string | null
           runtime: number | null
           search_text: string | null
+          season: number | null
           storage_chat_id: number | null
           storage_message_id: number | null
           title: string
@@ -339,21 +347,29 @@ export type Database = {
           aliases?: string[] | null
           auto_indexed?: boolean
           backdrop_url?: string | null
+          clean_caption?: string | null
+          content_kind?: string | null
           created_at?: string
+          episode_end?: number | null
+          episode_start?: number | null
           file_id: string
           file_kind?: string
           file_size?: number | null
           genres?: string | null
           id?: number
           imdb_id?: string | null
+          is_combined?: boolean
           language?: string | null
           media_type?: string | null
+          metadata_version?: number
           original_title?: string | null
           overview?: string | null
           poster_url?: string | null
           quality?: string | null
+          raw_caption?: string | null
           runtime?: number | null
           search_text?: string | null
+          season?: number | null
           storage_chat_id?: number | null
           storage_message_id?: number | null
           title: string
@@ -367,21 +383,29 @@ export type Database = {
           aliases?: string[] | null
           auto_indexed?: boolean
           backdrop_url?: string | null
+          clean_caption?: string | null
+          content_kind?: string | null
           created_at?: string
+          episode_end?: number | null
+          episode_start?: number | null
           file_id?: string
           file_kind?: string
           file_size?: number | null
           genres?: string | null
           id?: number
           imdb_id?: string | null
+          is_combined?: boolean
           language?: string | null
           media_type?: string | null
+          metadata_version?: number
           original_title?: string | null
           overview?: string | null
           poster_url?: string | null
           quality?: string | null
+          raw_caption?: string | null
           runtime?: number | null
           search_text?: string | null
+          season?: number | null
           storage_chat_id?: number | null
           storage_message_id?: number | null
           title?: string

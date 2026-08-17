@@ -31,6 +31,7 @@ import { Route as ApiPublicTelegramRegisterRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksTmdbBackfillRouteImport } from './routes/api/public/hooks/tmdb-backfill'
 import { Route as ApiPublicHooksStorageScanRouteImport } from './routes/api/public/hooks/storage-scan'
 import { Route as ApiPublicHooksRunDeleteQueueRouteImport } from './routes/api/public/hooks/run-delete-queue'
+import { Route as ApiPublicHooksMetadataBackfillRouteImport } from './routes/api/public/hooks/metadata-backfill'
 import { Route as ApiPublicHooksGroupInviteRemindersRouteImport } from './routes/api/public/hooks/group-invite-reminders'
 import { Route as ApiPublicHooksCleanupPayloadsRouteImport } from './routes/api/public/hooks/cleanup-payloads'
 import { Route as ApiPublicDlIdRouteImport } from './routes/api/public/dl/$id'
@@ -158,6 +159,12 @@ const ApiPublicHooksRunDeleteQueueRoute =
     path: '/api/public/hooks/run-delete-queue',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksMetadataBackfillRoute =
+  ApiPublicHooksMetadataBackfillRouteImport.update({
+    id: '/api/public/hooks/metadata-backfill',
+    path: '/api/public/hooks/metadata-backfill',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksGroupInviteRemindersRoute =
   ApiPublicHooksGroupInviteRemindersRouteImport.update({
     id: '/api/public/hooks/group-invite-reminders',
@@ -202,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/api/public/dl/$id': typeof ApiPublicDlIdRoute
   '/api/public/hooks/cleanup-payloads': typeof ApiPublicHooksCleanupPayloadsRoute
   '/api/public/hooks/group-invite-reminders': typeof ApiPublicHooksGroupInviteRemindersRoute
+  '/api/public/hooks/metadata-backfill': typeof ApiPublicHooksMetadataBackfillRoute
   '/api/public/hooks/run-delete-queue': typeof ApiPublicHooksRunDeleteQueueRoute
   '/api/public/hooks/storage-scan': typeof ApiPublicHooksStorageScanRoute
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
@@ -229,6 +237,7 @@ export interface FileRoutesByTo {
   '/api/public/dl/$id': typeof ApiPublicDlIdRoute
   '/api/public/hooks/cleanup-payloads': typeof ApiPublicHooksCleanupPayloadsRoute
   '/api/public/hooks/group-invite-reminders': typeof ApiPublicHooksGroupInviteRemindersRoute
+  '/api/public/hooks/metadata-backfill': typeof ApiPublicHooksMetadataBackfillRoute
   '/api/public/hooks/run-delete-queue': typeof ApiPublicHooksRunDeleteQueueRoute
   '/api/public/hooks/storage-scan': typeof ApiPublicHooksStorageScanRoute
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
@@ -258,6 +267,7 @@ export interface FileRoutesById {
   '/api/public/dl/$id': typeof ApiPublicDlIdRoute
   '/api/public/hooks/cleanup-payloads': typeof ApiPublicHooksCleanupPayloadsRoute
   '/api/public/hooks/group-invite-reminders': typeof ApiPublicHooksGroupInviteRemindersRoute
+  '/api/public/hooks/metadata-backfill': typeof ApiPublicHooksMetadataBackfillRoute
   '/api/public/hooks/run-delete-queue': typeof ApiPublicHooksRunDeleteQueueRoute
   '/api/public/hooks/storage-scan': typeof ApiPublicHooksStorageScanRoute
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
@@ -287,6 +297,7 @@ export interface FileRouteTypes {
     | '/api/public/dl/$id'
     | '/api/public/hooks/cleanup-payloads'
     | '/api/public/hooks/group-invite-reminders'
+    | '/api/public/hooks/metadata-backfill'
     | '/api/public/hooks/run-delete-queue'
     | '/api/public/hooks/storage-scan'
     | '/api/public/hooks/tmdb-backfill'
@@ -314,6 +325,7 @@ export interface FileRouteTypes {
     | '/api/public/dl/$id'
     | '/api/public/hooks/cleanup-payloads'
     | '/api/public/hooks/group-invite-reminders'
+    | '/api/public/hooks/metadata-backfill'
     | '/api/public/hooks/run-delete-queue'
     | '/api/public/hooks/storage-scan'
     | '/api/public/hooks/tmdb-backfill'
@@ -342,6 +354,7 @@ export interface FileRouteTypes {
     | '/api/public/dl/$id'
     | '/api/public/hooks/cleanup-payloads'
     | '/api/public/hooks/group-invite-reminders'
+    | '/api/public/hooks/metadata-backfill'
     | '/api/public/hooks/run-delete-queue'
     | '/api/public/hooks/storage-scan'
     | '/api/public/hooks/tmdb-backfill'
@@ -363,6 +376,7 @@ export interface RootRouteChildren {
   ApiPublicDlIdRoute: typeof ApiPublicDlIdRoute
   ApiPublicHooksCleanupPayloadsRoute: typeof ApiPublicHooksCleanupPayloadsRoute
   ApiPublicHooksGroupInviteRemindersRoute: typeof ApiPublicHooksGroupInviteRemindersRoute
+  ApiPublicHooksMetadataBackfillRoute: typeof ApiPublicHooksMetadataBackfillRoute
   ApiPublicHooksRunDeleteQueueRoute: typeof ApiPublicHooksRunDeleteQueueRoute
   ApiPublicHooksStorageScanRoute: typeof ApiPublicHooksStorageScanRoute
   ApiPublicHooksTmdbBackfillRoute: typeof ApiPublicHooksTmdbBackfillRoute
@@ -526,6 +540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksRunDeleteQueueRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/metadata-backfill': {
+      id: '/api/public/hooks/metadata-backfill'
+      path: '/api/public/hooks/metadata-backfill'
+      fullPath: '/api/public/hooks/metadata-backfill'
+      preLoaderRoute: typeof ApiPublicHooksMetadataBackfillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/group-invite-reminders': {
       id: '/api/public/hooks/group-invite-reminders'
       path: '/api/public/hooks/group-invite-reminders'
@@ -611,6 +632,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksCleanupPayloadsRoute: ApiPublicHooksCleanupPayloadsRoute,
   ApiPublicHooksGroupInviteRemindersRoute:
     ApiPublicHooksGroupInviteRemindersRoute,
+  ApiPublicHooksMetadataBackfillRoute: ApiPublicHooksMetadataBackfillRoute,
   ApiPublicHooksRunDeleteQueueRoute: ApiPublicHooksRunDeleteQueueRoute,
   ApiPublicHooksStorageScanRoute: ApiPublicHooksStorageScanRoute,
   ApiPublicHooksTmdbBackfillRoute: ApiPublicHooksTmdbBackfillRoute,
