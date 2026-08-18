@@ -892,7 +892,8 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         `🎬 Direct movie DMs\n\n` +
         `👇 *Ab kya karo?*\n` +
         `Movie ka naam type karo ya /help dekho.`,
-        { parse_mode: "Markdown" }
+        { parse_mode: "Markdown", keep_message: true } as any
+
       ).catch(() => {});
     }
     return ctx.reply(
