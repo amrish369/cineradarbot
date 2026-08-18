@@ -33,16 +33,15 @@ async function checkRef(api: TgApi, ref: string | null, userId: number): Promise
   }
 }
 
-async function hasStarted(api: TgApi, userId: number): Promise<boolean> {
+/**
+ * "started" is informational only — it never blocks the gate.
+ * Group/channel members are treated as verified even if they never DM'd the bot;
+ * delivery code falls back to a deep-link when a DM is not possible.
+ */
+async function hasStarted(_api: TgApi, userId: number): Promise<boolean> {
   const { data } = await supabaseAdmin
     .from("tg_users").select("telegram_id").eq("telegram_id", userId).maybeSingle();
-  if (!data) return false;
-  try {
-    await api.sendChatAction(userId, "typing");
-    return true;
-  } catch {
-    return false;
-  }
+  return !!data;
 }
 
 function fromRow(row: any): GateStatus {
