@@ -637,7 +637,6 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         const chatId = Number((payload as any)?.chat_id);
         if (Number.isFinite(chatId)) {
 
-        if (Number.isFinite(chatId)) {
           const s = await getSettings();
           const storage = Number(s.storage_channel_id);
           if (s.autodelete_status && chatId !== storage) {
