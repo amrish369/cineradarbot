@@ -54,7 +54,8 @@ function fromRow(row: any): GateStatus {
 
 function build(started: boolean, main: boolean, backup: boolean, channel: boolean): GateStatus {
   const missing: GateStatus["missing"] = [];
-  if (!started) missing.push("start");
+  // NOTE: `started` intentionally does NOT block — only real group/channel
+  // membership does. Existing group members pass without DM'ing the bot.
   if (!main) missing.push("main");
   if (!backup) missing.push("backup");
   if (!channel) missing.push("channel");
