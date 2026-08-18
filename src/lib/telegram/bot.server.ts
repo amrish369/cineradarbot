@@ -628,10 +628,15 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
     "forwardMessage",
   ]);
   bot.api.config.use(async (prev, method, payload, signal) => {
+    // `keep_message: true` marker => never auto-delete (e.g. /start welcome DM)
+    const keep = (payload as any)?.keep_message === true;
+    if (keep) delete (payload as any).keep_message;
     const res = await prev(method, payload as any, signal);
     try {
-      if (AUTO_DELETE_METHODS.has(method as string)) {
+      if (!keep && AUTO_DELETE_METHODS.has(method as string)) {
         const chatId = Number((payload as any)?.chat_id);
+        if (Number.isFinite(chatId)) {
+
         if (Number.isFinite(chatId)) {
           const s = await getSettings();
           const storage = Number(s.storage_channel_id);
