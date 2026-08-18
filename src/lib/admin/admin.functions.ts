@@ -354,7 +354,7 @@ async function publicOrigin(): Promise<string> {
   // NEVER derive this from the admin panel request: the panel is often opened on
   // an `id-preview--…` host, which redirects through auth and makes every
   // Telegram webhook fail. Always use the stable published project URL.
-  return "https://project--1b722323-ac1e-469f-895f-b63ab16c46ce.lovable.app";
+  return "https://project--10831104-572a-4be2-a77b-1e4b87c20f11-dev.lovable.app";
 }
 
 export const getBotWebhookInfo = createServerFn({ method: "POST" })
