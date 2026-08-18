@@ -628,11 +628,15 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
     "forwardMessage",
   ]);
   bot.api.config.use(async (prev, method, payload, signal) => {
+    // `keep_message: true` marker => never auto-delete (e.g. /start welcome DM)
+    const keep = (payload as any)?.keep_message === true;
+    if (keep) delete (payload as any).keep_message;
     const res = await prev(method, payload as any, signal);
     try {
-      if (AUTO_DELETE_METHODS.has(method as string)) {
+      if (!keep && AUTO_DELETE_METHODS.has(method as string)) {
         const chatId = Number((payload as any)?.chat_id);
         if (Number.isFinite(chatId)) {
+
           const s = await getSettings();
           const storage = Number(s.storage_channel_id);
           if (s.autodelete_status && chatId !== storage) {
@@ -888,7 +892,8 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         `🎬 Direct movie DMs\n\n` +
         `👇 *Ab kya karo?*\n` +
         `Movie ka naam type karo ya /help dekho.`,
-        { parse_mode: "Markdown" }
+        { parse_mode: "Markdown", keep_message: true } as any
+
       ).catch(() => {});
     }
     return ctx.reply(
@@ -908,7 +913,8 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       `━━━━━━━━━━━━━━━━━━━\n` +
       `⏱️ _Messages 5 min mein delete hote hain — forward karke save karo_\n` +
       `⚡ _3x Fast Download ke liye website visit karein ek baar_`,
-      { parse_mode: "Markdown" }
+      { parse_mode: "Markdown", keep_message: true } as any
+
     );
   });
 
