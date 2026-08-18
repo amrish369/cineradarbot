@@ -913,7 +913,8 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       `━━━━━━━━━━━━━━━━━━━\n` +
       `⏱️ _Messages 5 min mein delete hote hain — forward karke save karo_\n` +
       `⚡ _3x Fast Download ke liye website visit karein ek baar_`,
-      { parse_mode: "Markdown" }
+      { parse_mode: "Markdown", keep_message: true } as any
+
     );
   });
 
