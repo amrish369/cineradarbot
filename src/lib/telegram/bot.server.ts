@@ -588,6 +588,7 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
             `📩 Aapne request kiya tha: _${escapeMarkdown(req.title)}_`,
           parse_mode: "Markdown",
           reply_markup: await withBackupKb(dmKb, inserted.id),
+          keep_message: true,
         });
         await fulfillRequest(req.id);
         delivered++;
