@@ -2219,7 +2219,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         try {
           await ctx.api.sendMessage(req.user_id,
             `📩 *Aapki Request Update!*\n\n🎬 *${escapeMarkdown(req.title)}*\n\n✅ Admin ne aapki request dekh li hai!\n⏳ Movie jaldi upload hogi.`,
-            { parse_mode: "Markdown" });
+            { parse_mode: "Markdown", keep_message: true } as any);
         } catch {}
         return ctx.answerCallbackQuery({ text: "✅ User notified — movie not yet in DB" });
       }
