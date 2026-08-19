@@ -588,6 +588,7 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
             `📩 Aapne request kiya tha: _${escapeMarkdown(req.title)}_`,
           parse_mode: "Markdown",
           reply_markup: await withBackupKb(dmKb, inserted.id),
+          keep_message: true,
         });
         await fulfillRequest(req.id);
         delivered++;
@@ -1604,7 +1605,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         if (!pend) {
           try {
             await ctx.api.sendMessage(active.target_user_id,
-              `📣 *CineRadar Admin:*\n\n${escapeMarkdown(msg.text)}`, { parse_mode: "Markdown" });
+              `📣 *CineRadar Admin:*\n\n${escapeMarkdown(msg.text)}`, { parse_mode: "Markdown", keep_message: true } as any);
             await ctx.reply(`✅ Bhej diya to ${active.target_user_id}`);
           } catch (e) { await ctx.reply(`❌ Failed: ${(e as Error).message}`); }
           return;
@@ -2218,7 +2219,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         try {
           await ctx.api.sendMessage(req.user_id,
             `📩 *Aapki Request Update!*\n\n🎬 *${escapeMarkdown(req.title)}*\n\n✅ Admin ne aapki request dekh li hai!\n⏳ Movie jaldi upload hogi.`,
-            { parse_mode: "Markdown" });
+            { parse_mode: "Markdown", keep_message: true } as any);
         } catch {}
         return ctx.answerCallbackQuery({ text: "✅ User notified — movie not yet in DB" });
       }
@@ -2234,6 +2235,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
             `🌐 ${m.language || "N/A"} | 📺 ${m.quality || "N/A"}\n\n` +
             `✅ *Ab aap is movie ko download kar sakte hain!*`,
           parse_mode: "Markdown", reply_markup: await withBackupKb(dmKb, m.id),
+          keep_message: true,
         });
         return ctx.answerCallbackQuery({ text: `✅ ${m.title} — DM bhej di!` });
       } catch (e) {
