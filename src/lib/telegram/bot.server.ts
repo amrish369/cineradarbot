@@ -2235,6 +2235,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
             `🌐 ${m.language || "N/A"} | 📺 ${m.quality || "N/A"}\n\n` +
             `✅ *Ab aap is movie ko download kar sakte hain!*`,
           parse_mode: "Markdown", reply_markup: await withBackupKb(dmKb, m.id),
+          keep_message: true,
         });
         return ctx.answerCallbackQuery({ text: `✅ ${m.title} — DM bhej di!` });
       } catch (e) {
