@@ -389,36 +389,15 @@ function startAndJoinKb(uname: string): InlineKeyboard {
 }
 
 async function sendJoinAllInDm(bot: Bot, uid: number) {
-  const s = await getSettings();
-  const kb = new InlineKeyboard();
-  const mainLink = asHttpsLink(s.main_group_link || s.force_join_link);
-  const backupLink = asHttpsLink(s.backup_group_link);
-  if (mainLink) kb.url("📢 Main Group Join Karein", mainLink).row();
-  if (backupLink) kb.url("🗂️ Backup Group Join Karein", backupLink).row();
-  kb.text("✅ Sab Join Kar Li — Verify", "verify_join");
-  await bot.api.sendMessage(uid,
-    `🎬 *Welcome CineRadar!*\n\n` +
-    `Bot use karne se pehle neeche diye sab groups join karo, phir *Verify* dabaao.\n` +
-    `Verify hone ke baad group me movie ka naam likhte hi turant reply milega.`,
-    { parse_mode: "Markdown", reply_markup: kb }
-  ).catch((e) => console.error("[sendJoinAllInDm]", (e as Error).message));
+  const { sendCurrentStep } = await import("./onboarding.server");
+  await sendCurrentStep(bot.api as any, uid, { force: true, fresh: true });
 }
 
 async function sendForceJoinMsg(ctx: Context) {
-  const s = await getSettings();
-  const mainLink = asHttpsLink(s.main_group_link || s.force_join_link);
-  const backupLink = asHttpsLink(s.backup_group_link);
-  const kb = new InlineKeyboard();
-  if (mainLink) kb.url("📢 Main Group Join Karein", mainLink).row();
-  if (backupLink) kb.url("🗂️ Backup Group Join Karein", backupLink).row();
-  kb.text("✅ Join Kar Li — Verify", "verify_join");
-  await ctx.reply(
-    `🔒 *Bot Use Karne Ke Liye Pehle Group Join Karein!*\n\n` +
-    (mainLink ? `📢 Main Group: ${mainLink}\n` : "") +
-    (backupLink ? `🗂️ Backup Group: ${backupLink}\n\n` : "\n") +
-    `Join karke *"✅ Join Kar Li — Verify"* button dabaao.`,
-    { parse_mode: "Markdown", reply_markup: kb }
-  ).catch((e) => console.error("[sendForceJoinMsg]", (e as Error).message));
+  const uid = ctx.from?.id;
+  if (!uid) return;
+  const { sendCurrentStep } = await import("./onboarding.server");
+  await sendCurrentStep(ctx.api as any, uid, { force: true });
 }
 
 // ── Daily TMDB digest ──
@@ -708,7 +687,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
   bot.on("chat_member", async (ctx) => {
     try {
       const { trackChatMemberUpdate } = await import("./growth.server");
-      await trackChatMemberUpdate(ctx.update.chat_member);
+      await trackChatMemberUpdate(ctx.update.chat_member, bot.api);
     } catch (e) {
       console.error("[chat_member track]", (e as Error).message);
     }
@@ -779,9 +758,12 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       }
 
       const uname = ctx.from?.username ? `@${ctx.from.username}` : (ctx.from?.first_name ?? "user");
+      const { sendCurrentStep } = await import("./onboarding.server");
+      const delivered = await sendCurrentStep(bot.api as any, uid, { force: true })
+        .then(() => true).catch(() => false);
       await ctx.reply(
-        `⚠️ ${uname}, pehle ye poora karo:\n• ${labels.join("\n• ")}\n\n` +
-        `Neeche button dabaao — ek click me DM khulega, Start hoga aur sab join links milenge.`,
+        `⚠️ ${uname}, aapka agla step: ${labels[0]}\n` +
+        (delivered ? `👉 Step DM me bhej diya hai.` : `👉 Neeche button dabaao.`),
         { reply_markup: startAndJoinKb(meName(ctx)) }
       ).catch(() => null);
       // Incoming middleware and outgoing API transformer queue both messages.
@@ -1556,6 +1538,13 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
   bot.on("message:new_chat_members", async (ctx) => {
     for (const member of ctx.message.new_chat_members) {
       if (member.id === ctx.me.id) continue;
+      try {
+        const { trackChatMemberUpdate } = await import("./growth.server");
+        await trackChatMemberUpdate({
+          chat: ctx.chat,
+          new_chat_member: { user: member, status: "member" },
+        }, bot.api);
+      } catch (e) { console.error("[new member track]", (e as Error).message); }
       const firstName = escapeMarkdown(member.first_name);
       const welcomeMsg =
         `👋 Welcome ${firstName}\\!\n\n` +
