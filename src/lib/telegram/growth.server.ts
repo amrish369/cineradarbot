@@ -29,7 +29,7 @@ export async function upsertMembership(telegramId: number, patch: MembershipPatc
 }
 
 /** Map a chat_member update to the right membership column. */
-export async function trackChatMemberUpdate(update: any) {
+export async function trackChatMemberUpdate(update: any, api?: any) {
   const userId = Number(update?.new_chat_member?.user?.id);
   const chatId = Number(update?.chat?.id);
   const username = (update?.chat?.username || "").toLowerCase();
@@ -50,6 +50,16 @@ export async function trackChatMemberUpdate(update: any) {
   if (match(s.force_join_link)) patch.channel_joined = joined;
   if (Object.keys(patch).length === 0) return;
   await upsertMembership(userId, patch);
+
+  // Step complete → progress save → agla step apne aap DM me
+  if (joined && api) {
+    try {
+      const { advanceAfterJoin } = await import("./onboarding.server");
+      await advanceAfterJoin(api, userId);
+    } catch (e) {
+      console.error("[advanceAfterJoin]", (e as Error).message);
+    }
+  }
 }
 
 export function inviteKeyboardRows(s: Awaited<ReturnType<typeof getSettings>>) {
