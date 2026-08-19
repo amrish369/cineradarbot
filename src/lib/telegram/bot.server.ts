@@ -1605,7 +1605,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         if (!pend) {
           try {
             await ctx.api.sendMessage(active.target_user_id,
-              `📣 *CineRadar Admin:*\n\n${escapeMarkdown(msg.text)}`, { parse_mode: "Markdown" });
+              `📣 *CineRadar Admin:*\n\n${escapeMarkdown(msg.text)}`, { parse_mode: "Markdown", keep_message: true } as any);
             await ctx.reply(`✅ Bhej diya to ${active.target_user_id}`);
           } catch (e) { await ctx.reply(`❌ Failed: ${(e as Error).message}`); }
           return;
