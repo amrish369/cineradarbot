@@ -27,7 +27,11 @@ const DEFAULTS: BotSettings = {
   backup_group_link: null,
   storage_channel_id: -1004299446417,
   auto_index: true,
-  public_site_url: "https://downtoup781-gmail-com.lovable.app",
+  public_site_url:
+    (process.env.PUBLIC_APP_URL || process.env.APP_URL || "https://downtoup781-gmail-com.lovable.app").replace(
+      /\/$/,
+      "",
+    ),
 };
 
 let cache: { at: number; data: BotSettings } | null = null;
