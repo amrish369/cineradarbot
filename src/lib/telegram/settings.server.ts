@@ -46,9 +46,9 @@ async function readAll(): Promise<BotSettings> {
   const { data, error } = await supabaseAdmin.from("bot_settings").select("key,value");
   if (error) {
     console.error("[settings] read", error.message);
-    return { ...DEFAULTS };
+    return { ...defaults() };
   }
-  const merged: any = { ...DEFAULTS };
+  const merged: any = { ...defaults() };
   for (const row of data ?? []) {
     try {
       merged[(row as any).key] = (row as any).value;
