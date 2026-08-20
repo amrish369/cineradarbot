@@ -18,17 +18,26 @@ export interface BotSettings {
   public_site_url: string;            // base URL used for shareable movie links
 }
 
-const DEFAULTS: BotSettings = {
-  upload_mode: "normal",
-  autodelete_status: true,
-  autodelete_timer: 10,
-  force_join_link: null,
-  main_group_link: null,
-  backup_group_link: null,
-  storage_channel_id: -1004299446417,
-  auto_index: true,
-  public_site_url: "https://downtoup781-gmail-com.lovable.app",
-};
+// Built lazily: env vars are injected per-request on Workers, so reading them
+// at module scope would freeze the wrong value (or crash in global scope).
+function defaults(): BotSettings {
+  const site =
+    process.env.PUBLIC_APP_URL ||
+    process.env.APP_URL ||
+    "https://downtoup781-gmail-com.lovable.app";
+  const storage = Number(process.env.STORAGE_CHANNEL_ID || -1004299446417);
+  return {
+    upload_mode: "normal",
+    autodelete_status: true,
+    autodelete_timer: 10,
+    force_join_link: null,
+    main_group_link: null,
+    backup_group_link: null,
+    storage_channel_id: Number.isFinite(storage) ? storage : -1004299446417,
+    auto_index: true,
+    public_site_url: site.replace(/\/$/, ""),
+  };
+}
 
 let cache: { at: number; data: BotSettings } | null = null;
 const TTL_MS = 5000;
@@ -37,9 +46,9 @@ async function readAll(): Promise<BotSettings> {
   const { data, error } = await supabaseAdmin.from("bot_settings").select("key,value");
   if (error) {
     console.error("[settings] read", error.message);
-    return { ...DEFAULTS };
+    return { ...defaults() };
   }
-  const merged: any = { ...DEFAULTS };
+  const merged: any = { ...defaults() };
   for (const row of data ?? []) {
     try {
       merged[(row as any).key] = (row as any).value;
