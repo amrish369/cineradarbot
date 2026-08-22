@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { sendBroadcast } from "@/lib/admin/admin.functions";
+import { sendBroadcast, sendDirectMessage } from "@/lib/admin/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Send } from "lucide-react";
+import { Send, MessageSquare } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/broadcast")({ component: BroadcastPage });
 
@@ -18,6 +18,26 @@ function BroadcastPage() {
   const [photo, setPhoto] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<any | null>(null);
+  const dm = useServerFn(sendDirectMessage);
+  const [dmTarget, setDmTarget] = useState("");
+  const [dmText, setDmText] = useState("");
+  const [dmPhoto, setDmPhoto] = useState("");
+  const [dmBusy, setDmBusy] = useState(false);
+
+  const sendDm = async () => {
+    if (!dmTarget.trim()) return toast.error("Telegram ID or @username required");
+    if (!dmText.trim()) return toast.error("Message required");
+    setDmBusy(true);
+    try {
+      await dm({ data: { target: dmTarget.trim(), text: dmText, photo_url: dmPhoto.trim() || undefined } });
+      toast.success("DM sent");
+      setDmText(""); setDmPhoto("");
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed");
+    } finally {
+      setDmBusy(false);
+    }
+  };
 
   const submit = async () => {
     if (!text.trim()) return toast.error("Message required");
@@ -54,6 +74,28 @@ function BroadcastPage() {
         <Button onClick={submit} disabled={busy} className="w-full sm:w-auto">
           <Send className="h-4 w-4 mr-2" />
           {busy ? "Sending…" : "Send broadcast"}
+        </Button>
+      </Card>
+
+      <Card className="p-4 space-y-4">
+        <div>
+          <h2 className="font-semibold flex items-center gap-2"><MessageSquare className="h-4 w-4" />Direct message</h2>
+          <p className="text-xs text-muted-foreground">Kisi bhi user ko DM bhejo — Telegram ID ya @username daalo.</p>
+        </div>
+        <div>
+          <Label>Telegram ID or @username</Label>
+          <Input value={dmTarget} onChange={(e) => setDmTarget(e.target.value)} placeholder="123456789 or @username" />
+        </div>
+        <div>
+          <Label>Message (HTML allowed)</Label>
+          <Textarea rows={5} value={dmText} onChange={(e) => setDmText(e.target.value)} placeholder="Hello!" />
+        </div>
+        <div>
+          <Label>Optional photo URL</Label>
+          <Input value={dmPhoto} onChange={(e) => setDmPhoto(e.target.value)} placeholder="https://…" />
+        </div>
+        <Button onClick={sendDm} disabled={dmBusy} variant="secondary" className="w-full sm:w-auto">
+          <Send className="h-4 w-4 mr-2" />{dmBusy ? "Sending…" : "Send DM"}
         </Button>
       </Card>
 
