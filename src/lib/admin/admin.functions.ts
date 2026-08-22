@@ -808,7 +808,7 @@ export const sendDirectMessage = createServerFn({ method: "POST" })
     }
 
     const endpoint = data.photo_url ? "sendPhoto" : "sendMessage";
-    const body: any = { chat_id: chatId, keep_message: true };
+    const body: any = { chat_id: chatId };
     if (data.photo_url) { body.photo = data.photo_url; body.caption = data.text; body.parse_mode = "HTML"; }
     else { body.text = data.text; body.parse_mode = "HTML"; }
 
