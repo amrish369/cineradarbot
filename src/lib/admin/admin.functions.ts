@@ -776,3 +776,50 @@ export const runMetadataBackfillBatch = createServerFn({ method: "POST" })
     const { runBackfillBatch } = await import("@/lib/telegram/backfill.server");
     return await runBackfillBatch(Math.min(50, Math.max(1, data.batch ?? 25)));
   });
+
+// ─── Direct message (DM) to a single user ─────────────────────
+export const sendDirectMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { target: string; text: string; photo_url?: string }) =>
+    z.object({
+      target: z.string().min(1).max(64),
+      text: z.string().min(1).max(4000),
+      photo_url: z.string().url().optional(),
+    }).parse(d))
+  .handler(async ({ context, data }) => {
+    const email = await assertAdmin(context.claims);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { BOT_TOKEN } = await import("@/lib/telegram/config.server");
+    const token = BOT_TOKEN();
+
+    // Resolve target: numeric telegram id, @username, or username
+    const raw = data.target.trim();
+    let chatId: string | number | null = null;
+    if (/^-?\d+$/.test(raw)) {
+      chatId = Number(raw);
+    } else {
+      const uname = raw.replace(/^@/, "").toLowerCase();
+      const { data: row } = await supabaseAdmin
+        .from("tg_users")
+        .select("telegram_id")
+        .ilike("username", uname)
+        .maybeSingle();
+      chatId = row ? Number((row as any).telegram_id) : `@${uname}`;
+    }
+
+    const endpoint = data.photo_url ? "sendPhoto" : "sendMessage";
+    const body: any = { chat_id: chatId };
+    if (data.photo_url) { body.photo = data.photo_url; body.caption = data.text; body.parse_mode = "HTML"; }
+    else { body.text = data.text; body.parse_mode = "HTML"; }
+
+    const res = await fetch(`https://api.telegram.org/bot${token}/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const j: any = await res.json();
+    const { logActivity } = await import("./admin.server");
+    await logActivity(email, "dm.send", { target: raw, ok: !!j.ok });
+    if (!j.ok) throw new Error(j.description || "Telegram send failed");
+    return { ok: true, chat_id: chatId, message_id: j.result?.message_id ?? null };
+  });

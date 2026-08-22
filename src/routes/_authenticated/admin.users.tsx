@@ -2,12 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listUsers, setUserBan, exportUsersCSV, getGrowthStats, runGroupCampaign } from "@/lib/admin/admin.functions";
+import { listUsers, setUserBan, exportUsersCSV, getGrowthStats, runGroupCampaign, sendDirectMessage } from "@/lib/admin/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Search, Download, Ban, Check, Send, Bell } from "lucide-react";
+import { Search, Download, Ban, Check, Send, Bell, MessageSquare } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({ component: UsersPage });
 
@@ -18,6 +21,11 @@ function UsersPage() {
   const exp = useServerFn(exportUsersCSV);
   const growth = useServerFn(getGrowthStats);
   const campaign = useServerFn(runGroupCampaign);
+  const dm = useServerFn(sendDirectMessage);
+  const [dmTarget, setDmTarget] = useState<any | null>(null);
+  const [dmText, setDmText] = useState("");
+  const [dmPhoto, setDmPhoto] = useState("");
+  const [dmBusy, setDmBusy] = useState(false);
   const [search, setSearch] = useState("");
   const [offset, setOffset] = useState(0);
   const [busy, setBusy] = useState<null | "invite" | "remind">(null);
@@ -36,6 +44,20 @@ function UsersPage() {
     await ban({ data: { telegram_id: u.telegram_id, ban: !u.banned } });
     toast.success(u.banned ? "Unbanned" : "Banned");
     qc.invalidateQueries({ queryKey: ["admin", "users"] });
+  };
+
+  const sendDm = async () => {
+    if (!dmText.trim()) return toast.error("Message required");
+    setDmBusy(true);
+    try {
+      await dm({ data: { target: String(dmTarget.telegram_id), text: dmText, photo_url: dmPhoto.trim() || undefined } });
+      toast.success("DM sent");
+      setDmTarget(null); setDmText(""); setDmPhoto("");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setDmBusy(false);
+    }
   };
 
   const download = async () => {
@@ -127,7 +149,10 @@ function UsersPage() {
                     ? <span className="inline-flex rounded px-2 py-0.5 text-xs bg-red-500/10 text-red-600">banned</span>
                     : <span className="inline-flex rounded px-2 py-0.5 text-xs bg-green-500/10 text-green-600">active</span>}
                 </td>
-                <td className="p-2 text-right">
+                <td className="p-2 text-right space-x-2 whitespace-nowrap">
+                  <Button variant="outline" size="sm" onClick={() => { setDmTarget(u); setDmText(""); setDmPhoto(""); }}>
+                    <MessageSquare className="h-3 w-3 mr-1" />DM
+                  </Button>
                   <Button variant={u.banned ? "outline" : "destructive"} size="sm" onClick={() => toggleBan(u)}>
                     {u.banned ? <><Check className="h-3 w-3 mr-1" />Unban</> : <><Ban className="h-3 w-3 mr-1" />Ban</>}
                   </Button>
@@ -143,6 +168,31 @@ function UsersPage() {
         <span className="text-muted-foreground">{offset + 1}–{Math.min(offset + 50, total)} of {total}</span>
         <Button variant="outline" size="sm" disabled={offset + 50 >= total} onClick={() => setOffset(offset + 50)}>Next</Button>
       </div>
+
+      <Dialog open={!!dmTarget} onOpenChange={(o) => !o && setDmTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              Send DM to {dmTarget?.username ? `@${dmTarget.username}` : dmTarget?.first_name ?? dmTarget?.telegram_id}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Message (HTML allowed)</Label>
+              <Textarea rows={6} value={dmText} onChange={(e) => setDmText(e.target.value)} placeholder="Hi!" />
+            </div>
+            <div>
+              <Label>Optional photo URL</Label>
+              <Input value={dmPhoto} onChange={(e) => setDmPhoto(e.target.value)} placeholder="https://…" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={sendDm} disabled={dmBusy}>
+              <Send className="h-4 w-4 mr-2" />{dmBusy ? "Sending…" : "Send DM"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
