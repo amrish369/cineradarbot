@@ -1,8 +1,9 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { getSettings, asHttpsLink } from "./settings.server";
 import { getUserGateStatus, type GateStatus } from "./membership.server";
+import { getInstagramGate } from "./instagram.server";
 
-export type Step = "main" | "backup" | "channel" | "done";
+export type Step = "instagram" | "main" | "backup" | "channel" | "done";
 
 interface StepView {
   step: Step;
@@ -12,16 +13,27 @@ interface StepView {
 }
 
 /** Sequential order — sirf pehla incomplete step dikhta hai. */
-const ORDER: Array<Exclude<Step, "done">> = ["main", "backup", "channel"];
+const ORDER: Array<Exclude<Step, "done">> = ["instagram", "main", "backup", "channel"];
 
 export function nextStep(st: GateStatus): Step {
-  for (const s of ORDER) if (st.missing.includes(s)) return s;
+  for (const s of ORDER) if (st.missing.includes(s as any)) return s;
   return "done";
 }
 
 export async function stepView(step: Step, index: number, total: number): Promise<StepView> {
   const s = await getSettings();
   const head = step === "done" ? "" : `*Step ${index}/${total}*\n\n`;
+  
+  if (step === "instagram") {
+    const gate = await getInstagramGate();
+    const username = gate.username || "our_profile";
+    return {
+      step,
+      button: "📸 Instagram Follow Karein",
+      url: `https://instagram.com/${username.replace(/^@/, "")}`,
+      text: `${head}📸 *Instagram Follow Karo*\n\n🎯 Profile follow karke agla step unlock karo.\n\n_Next step ke liye follow confirm karenge._`,
+    };
+  }
   if (step === "main")
     return {
       step, button: "📢 Main Group Join Karein",
@@ -47,14 +59,18 @@ export async function stepView(step: Step, index: number, total: number): Promis
 }
 
 function stepIndex(st: GateStatus, step: Step): { index: number; total: number } {
-  const applicable = ORDER.filter((s) => st.missing.includes(s) || isDone(st, s));
+  const applicable = ORDER.filter((s) => st.missing.includes(s as any) || isDone(st, s));
   const total = applicable.length || 1;
   const i = applicable.indexOf(step as any);
   return { index: i < 0 ? total : i + 1, total };
 }
 
 function isDone(st: GateStatus, s: Exclude<Step, "done">) {
-  return s === "main" ? st.main : s === "backup" ? st.backup : st.channel;
+  if (s === "instagram") return st.instagram;
+  if (s === "main") return st.main;
+  if (s === "backup") return st.backup;
+  if (s === "channel") return st.channel;
+  return false;
 }
 
 const KEY = (uid: number) => `onb_${uid}`;
