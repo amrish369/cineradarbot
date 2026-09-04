@@ -127,6 +127,8 @@ function detectSeries(text: string): SeriesHit | null {
     if (m) {
       const hit = p.map(m);
       if (hit.season !== null && (hit.season < 0 || hit.season > 60)) continue;
+      if (hit.ep_start !== null && hit.ep_end !== null && hit.ep_end <= hit.ep_start) continue;
+      if (hit.ep_end !== null && hit.ep_start !== null && hit.ep_end - hit.ep_start > 200) continue;
       return hit;
     }
   }
