@@ -165,13 +165,16 @@ function parseCaption(raw: string): { name: string; year: number | null; languag
 
 function movieBtnLabel(m: MovieRow): string {
   const parts: (string | number)[] = [m.title];
+  const tag = seriesTag(m);
+  if (tag) parts.push(tag);
   if (m.year) parts.push(m.year);
   parts.push("|");
   parts.push(m.language || "N/A");
   parts.push("|");
   parts.push(m.quality || "N/A");
-  return `⬇️ ${parts.join(" ")}`.slice(0, 60);
+  return `⬇️ ${parts.join(" ")}`.slice(0, 120);
 }
+
 
 const RESULTS_PER_PAGE = 10;
 
