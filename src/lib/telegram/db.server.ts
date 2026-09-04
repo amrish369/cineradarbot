@@ -26,7 +26,14 @@ export interface MovieRow {
   aliases?: string[] | null;
   search_text?: string | null;
   tmdb_verified?: boolean | null;
+  content_kind?: string | null;
+  season?: number | null;
+  episode_start?: number | null;
+  episode_end?: number | null;
+  is_combined?: boolean | null;
+  clean_caption?: string | null;
 }
+
 
 export async function fetchAllMovies(): Promise<MovieRow[]> {
   let allMovies: MovieRow[] = [];
