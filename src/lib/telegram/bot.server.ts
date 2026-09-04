@@ -173,7 +173,7 @@ function movieBtnLabel(m: MovieRow): string {
   return `⬇️ ${parts.join(" ")}`.slice(0, 60);
 }
 
-const RESULTS_PER_PAGE = 5;
+const RESULTS_PER_PAGE = 10;
 
 function formatSize(bytes: number | null | undefined): string | null {
   if (!bytes || bytes <= 0) return null;
@@ -182,17 +182,34 @@ function formatSize(bytes: number | null | undefined): string | null {
   return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
+/** Compact season/episode tag for buttons, e.g. "S01 Combined" or "S02E04". */
+function seriesTag(m: MovieRow): string | null {
+  const anyM = m as any;
+  if (anyM.content_kind !== "series" || !anyM.season) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const s = `S${pad(anyM.season)}`;
+  if (anyM.episode_start && anyM.episode_end && anyM.episode_end > anyM.episode_start) {
+    return `${s}E${pad(anyM.episode_start)}-E${pad(anyM.episode_end)}${anyM.is_combined ? " Combined" : ""}`;
+  }
+  if (anyM.episode_start) return `${s}E${pad(anyM.episode_start)}`;
+  return `${s} Combined`;
+}
+
 function movieRowLabel(m: MovieRow): string {
   const size = formatSize((m as any).file_size);
   const bits = [m.title];
+  const tag = seriesTag(m);
+  if (tag) bits.push(tag);
   if (m.year) bits.push(String(m.year));
   if (m.language) bits.push(m.language);
   if (m.quality) bits.push(m.quality);
   const label = bits.join(" ");
   const prefix = size ? `[${size}] ` : "";
-  // Telegram button label max ~64 chars
-  return (prefix + label).slice(0, 64);
+  // Telegram inline button labels get ellipsised by the client, so keep the
+  // full name and only trim absurdly long strings.
+  return (prefix + label).slice(0, 120);
 }
+
 
 function buildResultsMessage(
   query: string,
