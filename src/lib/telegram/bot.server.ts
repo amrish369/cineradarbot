@@ -488,17 +488,32 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
   const yearNum = pend.year ? Number(String(pend.year).trim()) : null;
   const finalQuality = pend.quality || qualityFromSize(pend.file_size) || null;
 
+  // Smart-parse the admin-entered name (plus original caption/filename) so
+  // series metadata (season / episode / combined) is captured on manual uploads.
+  const parsed = parseSmart(
+    `${pend.name} ${pend.raw_caption ?? pend.caption ?? ""}`.trim(),
+    pend.file_name ?? null,
+  );
+  const cleanName = parsed.title && parsed.title.length >= 2 ? parsed.title : pend.name.trim();
+
   // Auto TMDB verification
   let verified: Awaited<ReturnType<typeof tmdbVerify>> = null;
   try {
-    verified = await tmdbVerify(pend.name.trim(), yearNum);
+    verified = await tmdbVerify(cleanName, yearNum ?? parsed.year ?? null);
   } catch (e) {
     console.error("[tmdbVerify]", (e as Error).message);
   }
 
-  const finalTitle = verified?.title || pend.name.trim();
-  const finalYear = verified?.year ?? (yearNum && Number.isFinite(yearNum) ? yearNum : null);
-  const finalLang = pend.language ?? verified?.language ?? null;
+  const finalTitle = verified?.title || cleanName;
+  const finalYear =
+    (yearNum && Number.isFinite(yearNum) ? yearNum : null) ?? parsed.year ?? verified?.year ?? null;
+  const finalLang = pend.language ?? parsed.language ?? verified?.language ?? null;
+  const contentKind =
+    parsed.kind === "series" || parsed.season !== null
+      ? "series"
+      : verified?.media_type === "TV"
+        ? "series"
+        : "movie";
   const aliases = generateAliases(finalTitle, verified?.original_title || null);
   const searchText = buildSearchText({
     title: finalTitle,
@@ -507,6 +522,14 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
     genres: verified?.genres || null,
     aliases,
   } as any);
+
+  const seriesMeta = {
+    content_kind: contentKind,
+    season: parsed.season,
+    episode_start: parsed.episode_start,
+    episode_end: parsed.episode_end,
+    is_combined: !!parsed.combined,
+  };
 
   const { movie: inserted, error: insErr } = await insertMovie({
     title: finalTitle,
@@ -532,7 +555,17 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
     aliases,
     search_text: searchText,
     tmdb_verified: !!verified,
+    ...seriesMeta,
+    clean_caption: buildUserCaption({
+      title: finalTitle,
+      year: finalYear,
+      language: finalLang,
+      quality: finalQuality,
+      file_size: pend.file_size ?? null,
+      ...seriesMeta,
+    }),
   } as any);
+
   await clearPendingUpload(adminId);
 
   if (!inserted) {
