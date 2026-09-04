@@ -144,9 +144,18 @@ export async function indexChannelPost(
 
   if (targetId === null) {
     // Same title+year+quality already present → refresh instead of duplicating.
+    // BUT: For series, also check season/episode so we don't overwrite different episodes
     let q = supabaseAdmin.from("movies").select("id").eq("title", title);
     q = year === null ? q.is("year", null) : q.eq("year", year);
     q = quality === null ? q.is("quality", null) : q.eq("quality", quality);
+    
+    // 🔧 FIX: Include series metadata in duplicate detection
+    if (contentKind === "series") {
+      q = parsed.season !== null ? q.eq("season", parsed.season) : q.is("season", null);
+      q = parsed.episode_start !== null ? q.eq("episode_start", parsed.episode_start) : q.is("episode_start", null);
+      q = parsed.episode_end !== null ? q.eq("episode_end", parsed.episode_end) : q.is("episode_end", null);
+    }
+    
     const { data: sameTitle } = await q.limit(1).maybeSingle();
     if (sameTitle) targetId = (sameTitle as any).id;
   }
