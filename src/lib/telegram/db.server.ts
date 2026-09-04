@@ -30,7 +30,7 @@ export interface MovieRow {
   season?: number | null;
   episode_start?: number | null;
   episode_end?: number | null;
-  is_combined?: boolean | null;
+  is_combined?: boolean;
   clean_caption?: string | null;
 }
 
