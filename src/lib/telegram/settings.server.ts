@@ -16,6 +16,8 @@ export interface BotSettings {
   storage_channel_id: number;         // -100... channel id for movie file storage
   auto_index: boolean;                // auto-index files posted in storage channel
   public_site_url: string;            // base URL used for shareable movie links
+  instagram_gate_enabled?: boolean;   // Instagram follow gate (optional)
+  instagram_username?: string | null; // Instagram username to follow
 }
 
 // Built lazily: env vars are injected per-request on Workers, so reading them
@@ -36,6 +38,8 @@ function defaults(): BotSettings {
     storage_channel_id: Number.isFinite(storage) ? storage : -1004299446417,
     auto_index: true,
     public_site_url: site.replace(/\/$/, ""),
+    instagram_gate_enabled: false,
+    instagram_username: null,
   };
 }
 
