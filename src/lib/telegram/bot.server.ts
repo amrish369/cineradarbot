@@ -582,12 +582,14 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
   }
 
   const sizeLabel = fmtSize(pend.file_size);
+  const savedTag = seriesTag(inserted as any);
   const caption =
-    `✅ *Movie Saved!*\n\n` +
-    `🎬 ${escapeMarkdown(pend.name)} (${yearNum || "?"})\n` +
-    `🌐 ${pend.language || "N/A"} | 📺 ${finalQuality || "N/A"}` +
+    `✅ *${contentKind === "series" ? "Series" : "Movie"} Saved!*\n\n` +
+    `🎬 ${escapeMarkdown(finalTitle)}${savedTag ? ` ${escapeMarkdown(savedTag)}` : ""} (${finalYear || "?"})\n` +
+    `🌐 ${finalLang || "N/A"} | 📺 ${finalQuality || "N/A"}` +
     (sizeLabel ? ` | 💾 ${sizeLabel}` : "") + `\n` +
     `🆔 ID: \`${inserted.id}\``;
+
   const kb = new InlineKeyboard()
     .text("📢 Post to Channel", `post_to_channel_${inserted.id}`)
     .text("❌ No", "dismiss_post");
