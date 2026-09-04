@@ -75,7 +75,7 @@ import {
   runMigration,
   stopMigration,
 } from "./storage.server";
-import { buildUserCaption } from "./smart-parse.server";
+import { buildUserCaption, parseSmart } from "./smart-parse.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { enqueueDelete } from "./delete-queue.server";
 
@@ -165,15 +165,18 @@ function parseCaption(raw: string): { name: string; year: number | null; languag
 
 function movieBtnLabel(m: MovieRow): string {
   const parts: (string | number)[] = [m.title];
+  const tag = seriesTag(m);
+  if (tag) parts.push(tag);
   if (m.year) parts.push(m.year);
   parts.push("|");
   parts.push(m.language || "N/A");
   parts.push("|");
   parts.push(m.quality || "N/A");
-  return `⬇️ ${parts.join(" ")}`.slice(0, 60);
+  return `⬇️ ${parts.join(" ")}`.slice(0, 120);
 }
 
-const RESULTS_PER_PAGE = 5;
+
+const RESULTS_PER_PAGE = 10;
 
 function formatSize(bytes: number | null | undefined): string | null {
   if (!bytes || bytes <= 0) return null;
@@ -182,17 +185,34 @@ function formatSize(bytes: number | null | undefined): string | null {
   return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
+/** Compact season/episode tag for buttons, e.g. "S01 Combined" or "S02E04". */
+function seriesTag(m: MovieRow): string | null {
+  const anyM = m as any;
+  if (anyM.content_kind !== "series" || !anyM.season) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const s = `S${pad(anyM.season)}`;
+  if (anyM.episode_start && anyM.episode_end && anyM.episode_end > anyM.episode_start) {
+    return `${s}E${pad(anyM.episode_start)}-E${pad(anyM.episode_end)}${anyM.is_combined ? " Combined" : ""}`;
+  }
+  if (anyM.episode_start) return `${s}E${pad(anyM.episode_start)}`;
+  return `${s} Combined`;
+}
+
 function movieRowLabel(m: MovieRow): string {
   const size = formatSize((m as any).file_size);
   const bits = [m.title];
+  const tag = seriesTag(m);
+  if (tag) bits.push(tag);
   if (m.year) bits.push(String(m.year));
   if (m.language) bits.push(m.language);
   if (m.quality) bits.push(m.quality);
   const label = bits.join(" ");
   const prefix = size ? `[${size}] ` : "";
-  // Telegram button label max ~64 chars
-  return (prefix + label).slice(0, 64);
+  // Telegram inline button labels get ellipsised by the client, so keep the
+  // full name and only trim absurdly long strings.
+  return (prefix + label).slice(0, 120);
 }
+
 
 function buildResultsMessage(
   query: string,
@@ -468,17 +488,32 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
   const yearNum = pend.year ? Number(String(pend.year).trim()) : null;
   const finalQuality = pend.quality || qualityFromSize(pend.file_size) || null;
 
+  // Smart-parse the admin-entered name (plus original caption/filename) so
+  // series metadata (season / episode / combined) is captured on manual uploads.
+  const parsed = parseSmart(
+    `${pend.name} ${pend.raw_caption ?? pend.caption ?? ""}`.trim(),
+    pend.file_name ?? null,
+  );
+  const cleanName = parsed.title && parsed.title.length >= 2 ? parsed.title : pend.name.trim();
+
   // Auto TMDB verification
   let verified: Awaited<ReturnType<typeof tmdbVerify>> = null;
   try {
-    verified = await tmdbVerify(pend.name.trim(), yearNum);
+    verified = await tmdbVerify(cleanName, yearNum ?? parsed.year ?? null);
   } catch (e) {
     console.error("[tmdbVerify]", (e as Error).message);
   }
 
-  const finalTitle = verified?.title || pend.name.trim();
-  const finalYear = verified?.year ?? (yearNum && Number.isFinite(yearNum) ? yearNum : null);
-  const finalLang = pend.language ?? verified?.language ?? null;
+  const finalTitle = verified?.title || cleanName;
+  const finalYear =
+    (yearNum && Number.isFinite(yearNum) ? yearNum : null) ?? parsed.year ?? verified?.year ?? null;
+  const finalLang = pend.language ?? parsed.language ?? verified?.language ?? null;
+  const contentKind =
+    parsed.kind === "series" || parsed.season !== null
+      ? "series"
+      : verified?.media_type === "TV"
+        ? "series"
+        : "movie";
   const aliases = generateAliases(finalTitle, verified?.original_title || null);
   const searchText = buildSearchText({
     title: finalTitle,
@@ -487,6 +522,14 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
     genres: verified?.genres || null,
     aliases,
   } as any);
+
+  const seriesMeta = {
+    content_kind: contentKind,
+    season: parsed.season,
+    episode_start: parsed.episode_start,
+    episode_end: parsed.episode_end,
+    is_combined: !!parsed.combined,
+  };
 
   const { movie: inserted, error: insErr } = await insertMovie({
     title: finalTitle,
@@ -512,7 +555,17 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
     aliases,
     search_text: searchText,
     tmdb_verified: !!verified,
+    ...seriesMeta,
+    clean_caption: buildUserCaption({
+      title: finalTitle,
+      year: finalYear,
+      language: finalLang,
+      quality: finalQuality,
+      file_size: pend.file_size ?? null,
+      ...seriesMeta,
+    }),
   } as any);
+
   await clearPendingUpload(adminId);
 
   if (!inserted) {
@@ -529,12 +582,14 @@ async function finishUpload(ctx: Context, pend: any, adminId: number) {
   }
 
   const sizeLabel = fmtSize(pend.file_size);
+  const savedTag = seriesTag(inserted as any);
   const caption =
-    `✅ *Movie Saved!*\n\n` +
-    `🎬 ${escapeMarkdown(pend.name)} (${yearNum || "?"})\n` +
-    `🌐 ${pend.language || "N/A"} | 📺 ${finalQuality || "N/A"}` +
+    `✅ *${contentKind === "series" ? "Series" : "Movie"} Saved!*\n\n` +
+    `🎬 ${escapeMarkdown(finalTitle)}${savedTag ? ` ${escapeMarkdown(savedTag)}` : ""} (${finalYear || "?"})\n` +
+    `🌐 ${finalLang || "N/A"} | 📺 ${finalQuality || "N/A"}` +
     (sizeLabel ? ` | 💾 ${sizeLabel}` : "") + `\n` +
     `🆔 ID: \`${inserted.id}\``;
+
   const kb = new InlineKeyboard()
     .text("📢 Post to Channel", `post_to_channel_${inserted.id}`)
     .text("❌ No", "dismiss_post");
