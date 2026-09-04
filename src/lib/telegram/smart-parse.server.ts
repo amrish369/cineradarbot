@@ -79,6 +79,16 @@ function detectSeries(text: string): SeriesHit | null {
   const combinedWord = /\b(combined|complete|full\s*season|all\s*episodes?|batch)\b/i.test(t);
 
   const patterns: Array<{ re: RegExp; map: (m: RegExpMatchArray) => SeriesHit }> = [
+    // S01 E01 04 / S01 EP 01 04 — space-separated episode range (no dash)
+    {
+      re: /\bS\s*(\d{1,2})\s*[.\-_ ]*\s*(?:E|EP|EPS|EPISODE)\s*(\d{1,3})\s+(\d{1,3})\b/i,
+      map: (m) => ({ season: +m[1], ep_start: +m[2], ep_end: +m[3], combined: true, consumed: [m[0]] }),
+    },
+    // E05 10 / EP 01 04 — episode range without season and without dash
+    {
+      re: /\b(?:E|EP|EPS|EPISODE)\s*(\d{1,3})\s+(\d{1,3})\b/i,
+      map: (m) => ({ season: null, ep_start: +m[1], ep_end: +m[2], combined: true, consumed: [m[0]] }),
+    },
     // S01E01-E08 / S01 EP 01 - 08 / S02EP01 / S01 E01
     {
       re: /\bS\s*(\d{1,2})\s*[.\-_ ]*\s*(?:E|EP|EPS|EPISODE)\s*(\d{1,3})\s*(?:[-–—]|\s+to\s+)\s*(?:E|EP|EPISODE)?\s*(\d{1,3})\b/i,
@@ -117,6 +127,8 @@ function detectSeries(text: string): SeriesHit | null {
     if (m) {
       const hit = p.map(m);
       if (hit.season !== null && (hit.season < 0 || hit.season > 60)) continue;
+      if (hit.ep_start !== null && hit.ep_end !== null && hit.ep_end < hit.ep_start) continue;
+      if (hit.ep_end !== null && hit.ep_start !== null && hit.ep_end - hit.ep_start > 200) continue;
       return hit;
     }
   }
