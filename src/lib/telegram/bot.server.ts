@@ -75,7 +75,7 @@ import {
   runMigration,
   stopMigration,
 } from "./storage.server";
-import { buildUserCaption } from "./smart-parse.server";
+import { buildUserCaption, parseSmart } from "./smart-parse.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { enqueueDelete } from "./delete-queue.server";
 
