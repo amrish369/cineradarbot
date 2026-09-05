@@ -244,19 +244,22 @@ function fmtSize(bytes?: number | null): string | null {
 
 /** Human label for the season/episode part, e.g. "Season 1 · Episode 01-08 (Combined)". */
 export function episodeLabel(m: CaptionSource): string | null {
-  if (m.content_kind !== "series" || !m.season) return null;
+  const season = m.season ?? null;
+  const epS = m.episode_start ?? null;
+  const epE = m.episode_end ?? null;
+  if (m.content_kind !== "series" && !season && !epS) return null;
+  if (!season && !epS) return null;
   const pad = (n: number) => String(n).padStart(2, "0");
-  let s = `Season ${m.season}`;
-  if (m.episode_start && m.episode_end && m.episode_end > m.episode_start) {
-    s += ` · Episode ${pad(m.episode_start)}-${pad(m.episode_end)}`;
-  } else if (m.episode_start) {
-    s += ` · Episode ${pad(m.episode_start)}`;
-  } else {
-    s += ` · Complete`;
-  }
-  if (m.is_combined && m.episode_start) s += ` (Combined)`;
+  const parts: string[] = [];
+  if (season) parts.push(`Season ${season}`);
+  if (epS && epE && epE > epS) parts.push(`Episode ${pad(epS)}-${pad(epE)}`);
+  else if (epS) parts.push(`Episode ${pad(epS)}`);
+  else parts.push("Complete");
+  let s = parts.join(" · ");
+  if (m.is_combined && epS) s += ` (Combined)`;
   return s;
 }
+
 
 /**
  * User-facing caption built purely from cleaned metadata.
