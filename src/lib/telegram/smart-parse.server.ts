@@ -242,6 +242,22 @@ function fmtSize(bytes?: number | null): string | null {
   return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
+/** Compact tag for buttons / storage captions, e.g. "S01E01-E04 Combined". */
+export function seriesTag(m: CaptionSource): string | null {
+  const season = m.season ?? null;
+  const epS = m.episode_start ?? null;
+  const epE = m.episode_end ?? null;
+  if (m.content_kind !== "series" && !season && !epS) return null;
+  if (!season && !epS) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const s = season ? `S${pad(season)}` : "";
+  if (epS && epE && epE > epS) {
+    return `${s}E${pad(epS)}-E${pad(epE)}${m.is_combined ? " Combined" : ""}`.trim();
+  }
+  if (epS) return `${s}E${pad(epS)}`;
+  return `${s}${m.is_combined ? " Combined" : ""}`.trim();
+}
+
 /** Human label for the season/episode part, e.g. "Season 1 · Episode 01-08 (Combined)". */
 export function episodeLabel(m: CaptionSource): string | null {
   const season = m.season ?? null;

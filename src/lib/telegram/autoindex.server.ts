@@ -57,6 +57,24 @@ export async function indexChannelPost(
   if (!file) return { status: "skipped", reason: "no video/document" };
 
   const rawText = (msg.caption || "").toString();
+
+  // Our own archive posts carry a "db:<id>" marker. Re-parsing them would
+  // overwrite the richer metadata we already saved (season / episode / etc),
+  // so link the post to that row and leave the record untouched.
+  const own = rawText.match(/db:\s*(\d+)/i);
+  if (own) {
+    const ownId = Number(own[1]);
+    const { data: ownRow } = await supabaseAdmin
+      .from("movies").select("id,title").eq("id", ownId).maybeSingle();
+    if (ownRow) {
+      await supabaseAdmin
+        .from("movies")
+        .update({ storage_chat_id: chatId, storage_message_id: messageId })
+        .eq("id", ownId);
+      return { status: "skipped", reason: "own archive post", id: ownId, title: (ownRow as any).title };
+    }
+  }
+
   const parsed = parseSmart(rawText, file.file_name);
   if (!parsed.title || parsed.title.length < 2) {
     return { status: "skipped", reason: "no usable title in caption/filename" };

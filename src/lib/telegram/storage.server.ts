@@ -13,8 +13,11 @@ export async function archiveMovieToStorage(
   const s = await getSettings();
   const chatId = s.storage_channel_id;
   try {
+    const { seriesTag } = await import("./smart-parse.server");
+    const tag = seriesTag(movie as any);
     const caption =
       `🎬 ${movie.title}` +
+      (tag ? ` ${tag}` : "") +
       (movie.year ? ` (${movie.year})` : "") +
       ` | ${movie.language || "N/A"} | ${movie.quality || "N/A"}\n` +
       `🆔 db:${movie.id}`;

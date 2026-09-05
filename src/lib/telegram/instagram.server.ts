@@ -94,7 +94,7 @@ export function generateVerificationCode(): string {
  */
 export async function createInstagramVerification(userId: number, igUsername: string): Promise<VerificationRecord> {
   const code = generateVerificationCode();
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await (supabaseAdmin as any)
     .from("instagram_follows")
     .upsert(
       {
@@ -118,7 +118,7 @@ export async function createInstagramVerification(userId: number, igUsername: st
  * Check if user has already verified Instagram follow
  */
 export async function isInstagramFollowVerified(userId: number): Promise<boolean> {
-  const { data } = await supabaseAdmin
+  const { data } = await (supabaseAdmin as any)
     .from("instagram_follows")
     .select("user_id")
     .eq("user_id", userId)
@@ -130,7 +130,7 @@ export async function isInstagramFollowVerified(userId: number): Promise<boolean
  * Get verification code for a user (for UI display)
  */
 export async function getVerificationCode(userId: number): Promise<string | null> {
-  const { data } = await supabaseAdmin
+  const { data } = await (supabaseAdmin as any)
     .from("instagram_follows")
     .select("verification_code")
     .eq("user_id", userId)
@@ -142,7 +142,7 @@ export async function getVerificationCode(userId: number): Promise<string | null
  * Manual verification (step 2: user confirms they've followed and added code to bio)
  */
 export async function confirmInstagramVerification(userId: number): Promise<VerificationRecord> {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await (supabaseAdmin as any)
     .from("instagram_follows")
     .update({
       verified_at: new Date().toISOString(),
@@ -160,7 +160,7 @@ export async function confirmInstagramVerification(userId: number): Promise<Veri
  * Remove Instagram verification (admin can reset)
  */
 export async function resetInstagramVerification(userId: number): Promise<void> {
-  const { error } = await supabaseAdmin
+  const { error } = await (supabaseAdmin as any)
     .from("instagram_follows")
     .delete()
     .eq("user_id", userId);
