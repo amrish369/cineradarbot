@@ -185,18 +185,23 @@ function formatSize(bytes: number | null | undefined): string | null {
   return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
-/** Compact season/episode tag for buttons, e.g. "S01 Combined" or "S02E04". */
+/** Compact season/episode tag for buttons, e.g. "S01 Combined", "S02E04", "E05-E10". */
 function seriesTag(m: MovieRow): string | null {
   const anyM = m as any;
-  if (anyM.content_kind !== "series" || !anyM.season) return null;
+  const season = anyM.season as number | null;
+  const epS = anyM.episode_start as number | null;
+  const epE = anyM.episode_end as number | null;
+  if (anyM.content_kind !== "series" && !season && !epS) return null;
+  if (!season && !epS) return null;
   const pad = (n: number) => String(n).padStart(2, "0");
-  const s = `S${pad(anyM.season)}`;
-  if (anyM.episode_start && anyM.episode_end && anyM.episode_end > anyM.episode_start) {
-    return `${s}E${pad(anyM.episode_start)}-E${pad(anyM.episode_end)}${anyM.is_combined ? " Combined" : ""}`;
+  const s = season ? `S${pad(season)}` : "";
+  if (epS && epE && epE > epS) {
+    return `${s}E${pad(epS)}-E${pad(epE)}${anyM.is_combined ? " Combined" : ""}`.trim();
   }
-  if (anyM.episode_start) return `${s}E${pad(anyM.episode_start)}`;
-  return `${s} Combined`;
+  if (epS) return `${s}E${pad(epS)}`;
+  return `${s}${anyM.is_combined ? " Combined" : ""}`.trim();
 }
+
 
 function movieRowLabel(m: MovieRow): string {
   const size = formatSize((m as any).file_size);
