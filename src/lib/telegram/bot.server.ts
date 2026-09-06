@@ -450,12 +450,7 @@ async function maybeSendDailyDigest(bot: Bot, userId: number) {
     const upcoming = await getIndianMoviesByType("upcoming", 12);
     const freshReleased = released.filter((m) => !sent.has(m._tmdbId)).slice(0, 2);
     const freshUpcoming = upcoming.filter((m) => !sent.has(m._tmdbId)).slice(0, 1);
-    if (!freshReleased.length && !freshUpcoming.length) {
-      await supabaseAdmin.from("bot_settings").upsert({
-        key, value: todayUTC as any, updated_at: new Date().toISOString(),
-      }, { onConflict: "key" });
-      return;
-    }
+    if (!freshReleased.length && !freshUpcoming.length) return;
 
     const intro =
       `🎬 *Daily Movie Update — ${todayUTC}*\n\n` +
