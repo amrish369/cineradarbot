@@ -477,11 +477,10 @@ async function maybeSendDailyDigest(bot: Bot, userId: number) {
       ...freshReleased.map((m) => ({ tmdb_id: m._tmdbId, kind: "released" })),
       ...freshUpcoming.map((m) => ({ tmdb_id: m._tmdbId, kind: "upcoming" })),
     ]);
-    await supabaseAdmin.from("bot_settings").upsert({
-      key, value: todayUTC as any, updated_at: new Date().toISOString(),
-    }, { onConflict: "key" });
   } catch (e) {
     console.error("[daily digest]", (e as Error).message);
+  } finally {
+    digestInFlight.delete(userId);
   }
 }
 
