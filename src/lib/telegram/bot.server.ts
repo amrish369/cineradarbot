@@ -383,8 +383,8 @@ async function withBackupKb(
   const backup = await backupGroupKb();
   let extra: InlineKeyboard | null = backup;
   if (movieId) {
-    const web = new InlineKeyboard().url("🔗 Web Download Link", await movieWebUrl(movieId));
-    extra = extra ? mergeKeyboards(extra, web) : web;
+    const ig = new InlineKeyboard().url("📷 Instagram Par Follow Karein", INSTAGRAM_URL);
+    extra = extra ? mergeKeyboards(extra, ig) : ig;
   }
   if (!extra) return kb ?? undefined;
   if (!kb) return extra;
@@ -894,7 +894,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       if (m) {
         const caption = buildUserCaption(m as any, {
         escape: escapeMarkdown,
-        footer: `⏱️ *Auto-delete in few min — forward karke save karo.*`,
+        footer: `⏱️ *Auto-delete in few min — forward karke save karo.*\n\n📷 *Instagram par humein follow karein* — agar future me bot ya group ban ho jaye, to bhi aap hamse jude rahenge.`,
       });
         try {
           await sendMovieFile(ctx.api, uid, m, {
@@ -917,7 +917,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       if (m) {
         const caption = buildUserCaption(m as any, {
         escape: escapeMarkdown,
-        footer: `⏱️ *Auto-delete in 5 min — forward karke save karo.*`,
+        footer: `⏱️ *Auto-delete in 5 min — forward karke save karo.*\n\n📷 *Instagram par humein follow karein* — agar future me bot ya group ban ho jaye, to bhi aap hamse jude rahenge.`,
       });
         try {
           await sendMovieFile(ctx.api, uid, m, { caption, parse_mode: "Markdown", reply_markup: await withBackupKb(null, m.id) });
@@ -2106,11 +2106,10 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       await logChat(uid, "bot", `[Download] ${m.title}`);
       const caption = buildUserCaption(m as any, {
         escape: escapeMarkdown,
-        footer: `⏱️ *Copyright Security: Yeh file 5 min mein auto-delete ho jayegi. Forward karke save karein.*`,
+        footer: `⏱️ *Copyright Security: Yeh file 5 min mein auto-delete ho jayegi. Forward karke save karein.*\n\n📷 *Instagram par humein follow karein* — agar future me bot ya group ban ho jaye, to bhi aap hamse jude rahenge.`,
       });
       
-      const kb = new InlineKeyboard()
-        .url("⚡ 3x Fast Download ke liye Website Visit Karein", WEBSITE_URL);
+      const kb = new InlineKeyboard();
 
       try {
         const chatType = ctx.chat?.type;
@@ -2280,14 +2279,14 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
       const m = matched[0];
       const dmKb = new InlineKeyboard()
         .text(`⬇️ Download Karein`, `send_${m.id}`).row()
-        .url("⚡ 3x Fast Download ke liye Website Visit Karein", WEBSITE_URL).row()
-        .url("📷 Instagram (Optional)", INSTAGRAM_URL);
+        .url("📷 Instagram Par Follow Karein", INSTAGRAM_URL);
       try {
         await sendMovieFile(ctx.api, req.user_id, m, {
           caption:
             `🎉 *Aapki Requested Movie Ready Hai!*\n\n🎬 *${escapeMarkdown(m.title)}* (${m.year || "?"})\n` +
             `🌐 ${m.language || "N/A"} | 📺 ${m.quality || "N/A"}\n\n` +
-            `✅ *Ab aap is movie ko download kar sakte hain!*`,
+            `✅ *Ab aap is movie ko download kar sakte hain!*\n\n` +
+            `📷 *Instagram par humein follow karein* — agar future me bot ya group ban ho jaye, to bhi aap hamse jude rahenge.`,
           parse_mode: "Markdown", reply_markup: await withBackupKb(dmKb, m.id),
           keep_message: true,
         });
