@@ -426,13 +426,24 @@ async function sendForceJoinMsg(ctx: Context) {
 }
 
 // ── Daily TMDB digest ──
+const digestInFlight = new Set<number>();
+
 async function maybeSendDailyDigest(bot: Bot, userId: number) {
+  if (digestInFlight.has(userId)) return;
+  digestInFlight.add(userId);
   try {
     const key = `daily_sent_user_${userId}`;
-    const { data: row } = await supabaseAdmin
-      .from("b_settings" as any).select("value").eq("key", key).maybeSingle();
     const todayUTC = new Date().toISOString().slice(0, 10);
-    if (row && (row as any).value === todayUTC) return;
+    const { data: row } = await supabaseAdmin
+      .from("bot_settings").select("value").eq("key", key).maybeSingle();
+    const seen = (row as any)?.value;
+    if (seen === todayUTC || seen === `"${todayUTC}"`) return;
+
+    // Mark first: agar bhejne me time lage to doosre message se dobara na jaye.
+    await supabaseAdmin.from("bot_settings").upsert({
+      key, value: todayUTC as any, updated_at: new Date().toISOString(),
+    }, { onConflict: "key" });
+
 
     const sent = await getSentTmdbIds();
     const released = await getIndianMoviesByType("new", 12);
