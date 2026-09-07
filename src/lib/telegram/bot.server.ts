@@ -258,7 +258,7 @@ async function renderSearchResults(
   if (!ranked.length) return {};
   const ids = ranked.map((m) => m.id);
   const key = editKey || (await storePayload({ kind: "search", query, ids }));
-  const { text, keyboard, pages } = buildResultsMessage(query, ids, ranked, page);
+  const { text, keyboard, pages } = buildResultsMessage(query, ids, ranked, page, undefined, randomEmojis());
   if (pages > 1) {
     keyboard.row();
     if (page > 1) keyboard.text("⬅️ Previous", `pg|${key}|${page - 1}`);
