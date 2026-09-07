@@ -292,7 +292,18 @@ async function tempReply(ctx: Context, text: string, opts: any = {}) {
   return msg;
 }
 
+function isGroupChat(ctx: Context): boolean {
+  const t = ctx.chat?.type;
+  return t === "group" || t === "supergroup";
+}
+
 async function tempPhoto(ctx: Context, photo: string, opts: any = {}) {
+  // Copyright safety: group/supergroup me TMDB poster kabhi mat bhejo — sirf text.
+  if (isGroupChat(ctx)) {
+    const text = (opts.caption as string) || "🎬 Movie info";
+    const { caption: _c, ...rest } = opts;
+    return tempReply(ctx, text, rest);
+  }
   const msg = await ctx.replyWithPhoto(photo, opts).catch((e) => {
     console.error("[tempPhoto]", (e as Error).message);
     return null;
