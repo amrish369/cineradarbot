@@ -219,19 +219,26 @@ function movieRowLabel(m: MovieRow): string {
 }
 
 
+// Har search par fresh excitement/celebration emojis — random pick.
+const CELEBRATION_EMOJIS = ["🎉","🥳","🎊","✨","🤩","🔥","💥","🎈","🚀","😍","🍿","🎁","🌟","💃","🕺","👏"];
+const randomEmojis = (n = 3) =>
+  [...CELEBRATION_EMOJIS].sort(() => Math.random() - 0.5).slice(0, n).join("");
+
 function buildResultsMessage(
   query: string,
   ids: number[],
   movies: MovieRow[],
   page: number,
   requestLabel?: string,
+  emoji?: string,
 ): { text: string; keyboard: InlineKeyboard; pages: number } {
   const total = ids.length;
   const pages = Math.max(1, Math.ceil(total / RESULTS_PER_PAGE));
   const p = Math.min(Math.max(1, page), pages);
   const start = (p - 1) * RESULTS_PER_PAGE;
   const slice = movies.slice(start, start + RESULTS_PER_PAGE);
-  let text = `👋 *Hey,*\n\n📽️ *I found some results for your query* 👉 *${escapeMarkdown(query)}*`;
+  const cheer = emoji ?? randomEmojis();
+  let text = `👋 *Hey,* ${cheer}\n\n📽️ *I found some results for your query* 👉 *${escapeMarkdown(query)}* ${cheer}`;
   if (pages > 1) text += `\n\n_Page ${p}/${pages}_`;
   const kb = new InlineKeyboard();
   kb.url("🤔 How To Download 🤔", WEBSITE_URL).row();
@@ -251,7 +258,7 @@ async function renderSearchResults(
   if (!ranked.length) return {};
   const ids = ranked.map((m) => m.id);
   const key = editKey || (await storePayload({ kind: "search", query, ids }));
-  const { text, keyboard, pages } = buildResultsMessage(query, ids, ranked, page);
+  const { text, keyboard, pages } = buildResultsMessage(query, ids, ranked, page, undefined, randomEmojis());
   if (pages > 1) {
     keyboard.row();
     if (page > 1) keyboard.text("⬅️ Previous", `pg|${key}|${page - 1}`);
