@@ -165,7 +165,7 @@ async function sendVerifyGate(
     `🎬 *${escapeMarkdown(movie.title)}*\n\n` +
     `Movie mil gayi ✅ File paane ke liye pehle verify karo.\n` +
     `Website par 3 steps complete karo, phir "Send File ✅" dabao.\n\n` +
-    `_Verification din me sirf ek baar karni hoti hai._`;
+    `ℹ️ Aapko din me sirf *ek baar* verify karna hai — uske baad din bhar *unlimited download* kar sakte hain.`;
 
   try {
     await ctx.api.sendMessage(uid, text, { parse_mode: "Markdown", reply_markup: kb });
