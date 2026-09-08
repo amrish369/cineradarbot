@@ -1005,6 +1005,10 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
     if (startParam?.startsWith("dl_")) {
       const mid = Number(startParam.slice(3));
       const m = Number.isFinite(mid) ? await fetchMovieById(mid) : null;
+      if (m && !(await isVerifiedToday(uid))) {
+        await sendVerifyGate(ctx, m, uid, ctx.chat?.id);
+        return;
+      }
       if (m) {
         const caption = buildUserCaption(m as any, {
         escape: escapeMarkdown,
