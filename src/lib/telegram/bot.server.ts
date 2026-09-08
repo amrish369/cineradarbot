@@ -139,6 +139,94 @@ async function sendMovieFile(api: any, chatId: number | string, movie: MovieRow,
   return api.sendVideo(chatId, movie.file_id, opts);
 }
 
+// ── Ad-verify gate ─────────────────────────────────────────────
+async function sendVerifyGate(
+  ctx: any,
+  movie: MovieRow,
+  uid: number,
+  chatId: number | string | undefined,
+): Promise<void> {
+  const created = await createUnlock(movie.title, uid);
+  if (!created) {
+    // Verification service down → don't block the user forever
+    await ctx.api
+      .sendMessage(uid, "⚠️ Verification service abhi down hai. Thodi der baad try karein.")
+      .catch(() => {});
+    return;
+  }
+  await rememberUnlockToken(created.token, { movieId: movie.id, userId: uid });
+
+  const kb = new InlineKeyboard()
+    .url("🔓 Verify & Unlock", created.url)
+    .row()
+    .text("Send File ✅", `send:${created.token}`);
+
+  const text =
+    `🎬 *${escapeMarkdown(movie.title)}*\n\n` +
+    `Movie mil gayi ✅ File paane ke liye pehle verify karo.\n` +
+    `Website par 3 steps complete karo, phir "Send File ✅" dabao.\n\n` +
+    `_Verification din me sirf ek baar karni hoti hai._`;
+
+  try {
+    await ctx.api.sendMessage(uid, text, { parse_mode: "Markdown", reply_markup: kb });
+  } catch {
+    // User hasn't started bot in DM → deep-link from group
+    if (chatId) {
+      const deepKb = new InlineKeyboard().url(
+        "▶️ Start Bot to Continue",
+        `https://t.me/${meName(ctx)}?start=get_${movie.id}`,
+      );
+      await ctx.api
+        .sendMessage(chatId, `📩 *${escapeMarkdown(movie.title)}* — pehle bot ko DM me start karein.`, {
+          parse_mode: "Markdown",
+          reply_markup: deepKb,
+        })
+        .catch(() => {});
+    }
+  }
+}
+
+async function deliverGatedMovie(
+  ctx: any,
+  m: MovieRow,
+  uid: number,
+  chatId: number | string | undefined,
+): Promise<any> {
+  await logChat(uid, "bot", `[Download] ${m.title}`);
+  const caption = buildUserCaption(m as any, {
+    escape: escapeMarkdown,
+    footer: `⏱️ *Copyright Security: Yeh file 5 min mein auto-delete ho jayegi. Forward karke save karein.*\n\n📷 *Instagram par humein follow karein* — agar future me bot ya group ban ho jaye, to bhi aap hamse jude rahenge.`,
+  });
+  const kb = new InlineKeyboard();
+
+  try {
+    await sendMovieFile(ctx.api, uid, m, {
+      caption,
+      parse_mode: "Markdown",
+      reply_markup: await withBackupKb(kb, m.id),
+    });
+    return ctx.answerCallbackQuery({ text: `📥 ${m.title} deliver ho rahi hai!` }).catch(() => {});
+  } catch (e) {
+    const err = e as any;
+    const desc = err?.description || err?.message || String(e);
+    console.error("[deliver] movie_id=", m.id, "err=", desc);
+    if (chatId) {
+      const deepKb = new InlineKeyboard().url(
+        "▶️ Start Bot to Receive File",
+        `https://t.me/${meName(ctx)}?start=get_${m.id}`,
+      );
+      await ctx.api
+        .sendMessage(chatId, `📩 *${escapeMarkdown(m.title)}* — pehle bot ko DM me start karein.`, {
+          parse_mode: "Markdown",
+          reply_markup: deepKb,
+        })
+        .catch(() => {});
+    }
+    return ctx.answerCallbackQuery({ text: "❌ Delivery failed — DM me bot start karein", show_alert: true }).catch(() => {});
+  }
+}
+
+
 const QUALITY_TOKENS = ["2160p","1440p","1080p","720p","540p","480p","360p","4K","UHD","HDR","HD","SD"];
 function parseCaption(raw: string): { name: string; year: number | null; language: string | null; quality: string | null } {
   const original = (raw || "").replace(/[\r\n]+/g, " ").trim();
