@@ -78,6 +78,14 @@ import {
 import { buildUserCaption, parseSmart } from "./smart-parse.server";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { enqueueDelete } from "./delete-queue.server";
+import {
+  createUnlock,
+  unlockStatus,
+  rememberUnlockToken,
+  readUnlockToken,
+  isVerifiedToday,
+  markVerifiedToday,
+} from "./unlock.server";
 
 // ─── helpers ────────────────────────────────────────────────
 function sanitize(s: string | undefined): string {
