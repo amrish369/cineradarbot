@@ -195,6 +195,7 @@ async function deliverGatedMovie(
   chatId: number | string | undefined,
 ): Promise<any> {
   await logChat(uid, "bot", `[Download] ${m.title}`);
+  await logVerifyEvent(uid, "download", m.id);
   const caption = buildUserCaption(m as any, {
     escape: escapeMarkdown,
     footer: `⏱️ *Copyright Security: Yeh file 5 min mein auto-delete ho jayegi. Forward karke save karein.*\n\n📷 *Instagram par humein follow karein* — agar future me bot ya group ban ho jaye, to bhi aap hamse jude rahenge.`,
