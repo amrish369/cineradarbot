@@ -2242,6 +2242,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
 
     if (data.startsWith("send:")) {
       const token = data.slice("send:".length);
+      await logVerifyEvent(uid, "send_tap");
       const mapped = await readUnlockToken(token);
       if (!mapped) {
         return ctx.answerCallbackQuery({ text: "⌛ Link expire ho gaya — dobara search karein.", show_alert: true });
