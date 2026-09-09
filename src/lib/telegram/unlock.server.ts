@@ -115,3 +115,22 @@ export async function markVerifiedToday(userId: number): Promise<void> {
       { onConflict: "key" },
     );
 }
+
+// ── verify analytics events ──
+export type VerifyEvent = "gate_shown" | "send_tap" | "verified" | "download";
+
+export async function logVerifyEvent(
+  userId: number,
+  event: VerifyEvent,
+  movieId?: number | null,
+): Promise<void> {
+  try {
+    await supabaseAdmin.from("verify_events").insert({
+      user_id: userId,
+      event,
+      movie_id: movieId ?? null,
+    } as any);
+  } catch (e) {
+    console.error("[verify_events] insert failed", (e as Error).message);
+  }
+}
