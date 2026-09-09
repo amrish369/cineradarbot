@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { checkIsAdmin } from "@/lib/admin/admin.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LayoutDashboard, Film, Users, Send, Bot as BotIcon, LogOut, Settings, HardDrive, Inbox } from "lucide-react";
+import { Menu, X, LayoutDashboard, Film, Users, Send, Bot as BotIcon, LogOut, Settings, HardDrive, Inbox, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -53,6 +53,7 @@ function Layout() {
     { to: "/admin/requests", label: "Requests", icon: Inbox },
     { to: "/admin/broadcast", label: "Broadcast", icon: Send },
     { to: "/admin/bots", label: "Bots", icon: BotIcon },
+    { to: "/admin/verify", label: "Verify Stats", icon: ShieldCheck },
     { to: "/admin/storage", label: "Storage", icon: HardDrive },
     { to: "/admin/settings", label: "Settings", icon: Settings },
   ];
