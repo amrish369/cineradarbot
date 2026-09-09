@@ -18,6 +18,7 @@ import { Route as MIdRouteImport } from './routes/m.$id'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminVerifyRouteImport } from './routes/_authenticated/admin.verify'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminStorageRouteImport } from './routes/_authenticated/admin.storage'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
@@ -83,6 +84,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminVerifyRoute =
+  AuthenticatedAdminVerifyRouteImport.update({
+    id: '/admin/verify',
+    path: '/admin/verify',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
@@ -205,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/storage': typeof AuthenticatedAdminStorageRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/verify': typeof AuthenticatedAdminVerifyRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/dl/$id': typeof ApiPublicDlIdRoute
   '/api/public/hooks/cleanup-payloads': typeof ApiPublicHooksCleanupPayloadsRoute
@@ -233,6 +241,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/storage': typeof AuthenticatedAdminStorageRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/admin/verify': typeof AuthenticatedAdminVerifyRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/api/public/dl/$id': typeof ApiPublicDlIdRoute
   '/api/public/hooks/cleanup-payloads': typeof ApiPublicHooksCleanupPayloadsRoute
@@ -263,6 +272,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/storage': typeof AuthenticatedAdminStorageRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/admin/verify': typeof AuthenticatedAdminVerifyRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/api/public/dl/$id': typeof ApiPublicDlIdRoute
   '/api/public/hooks/cleanup-payloads': typeof ApiPublicHooksCleanupPayloadsRoute
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/storage'
     | '/admin/users'
+    | '/admin/verify'
     | '/admin/'
     | '/api/public/dl/$id'
     | '/api/public/hooks/cleanup-payloads'
@@ -321,6 +332,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/storage'
     | '/admin/users'
+    | '/admin/verify'
     | '/admin'
     | '/api/public/dl/$id'
     | '/api/public/hooks/cleanup-payloads'
@@ -350,6 +362,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/storage'
     | '/_authenticated/admin/users'
+    | '/_authenticated/admin/verify'
     | '/_authenticated/admin/'
     | '/api/public/dl/$id'
     | '/api/public/hooks/cleanup-payloads'
@@ -447,6 +460,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/verify': {
+      id: '/_authenticated/admin/verify'
+      path: '/admin/verify'
+      fullPath: '/admin/verify'
+      preLoaderRoute: typeof AuthenticatedAdminVerifyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/users': {
@@ -586,6 +606,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminStorageRoute: typeof AuthenticatedAdminStorageRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
+  AuthenticatedAdminVerifyRoute: typeof AuthenticatedAdminVerifyRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -597,6 +618,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminStorageRoute: AuthenticatedAdminStorageRoute,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
+  AuthenticatedAdminVerifyRoute: AuthenticatedAdminVerifyRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
