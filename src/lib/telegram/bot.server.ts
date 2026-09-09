@@ -196,7 +196,9 @@ async function sendVerifyGate(
 
   try {
     await ctx.api.sendMessage(uid, text, { parse_mode: "Markdown", reply_markup: kb });
+    await notifyGroupRedirect(ctx, chatId, uid, movie, "verify");
   } catch {
+
     // User hasn't started bot in DM → deep-link from group
     if (chatId) {
       const deepKb = new InlineKeyboard().url(
