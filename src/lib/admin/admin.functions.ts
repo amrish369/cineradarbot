@@ -823,3 +823,83 @@ export const sendDirectMessage = createServerFn({ method: "POST" })
     if (!j.ok) throw new Error(j.description || "Telegram send failed");
     return { ok: true, chat_id: chatId, message_id: j.result?.message_id ?? null };
   });
+
+// ─── Verification / revenue analytics ─────────────────────────
+export const getVerifyStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.claims);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const since = new Date(Date.now() - 29 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10);
+
+    const { data: rows, error } = await supabaseAdmin
+      .from("verify_events")
+      .select("user_id,event,day")
+      .gte("day", since)
+      .limit(200000);
+    if (error) throw new Error(error.message);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const list = (rows ?? []) as { user_id: number; event: string; day: string }[];
+
+    const byDay = new Map<
+      string,
+      { day: string; gate_shown: number; send_tap: number; verified: number; download: number; users: Set<number> }
+    >();
+    const totals = { gate_shown: 0, send_tap: 0, verified: 0, download: 0 };
+    const allUsers = new Set<number>();
+    const todayUsers = new Set<number>();
+    const todayTotals = { gate_shown: 0, send_tap: 0, verified: 0, download: 0 };
+
+    for (const r of list) {
+      const key = r.event as keyof typeof totals;
+      if (!(key in totals)) continue;
+      let d = byDay.get(r.day);
+      if (!d) {
+        d = { day: r.day, gate_shown: 0, send_tap: 0, verified: 0, download: 0, users: new Set() };
+        byDay.set(r.day, d);
+      }
+      d[key] += 1;
+      d.users.add(r.user_id);
+      totals[key] += 1;
+      allUsers.add(r.user_id);
+      if (r.day === today) {
+        todayTotals[key] += 1;
+        todayUsers.add(r.user_id);
+      }
+    }
+
+    const daily = [...byDay.values()]
+      .sort((a, b) => (a.day < b.day ? 1 : -1))
+      .map((d) => ({
+        day: d.day,
+        gate_shown: d.gate_shown,
+        send_tap: d.send_tap,
+        verified: d.verified,
+        download: d.download,
+        users: d.users.size,
+      }));
+
+    // all-time counts (cheap head counts)
+    const [gAll, sAll, vAll, dAll] = await Promise.all([
+      supabaseAdmin.from("verify_events").select("*", { count: "exact", head: true }).eq("event", "gate_shown"),
+      supabaseAdmin.from("verify_events").select("*", { count: "exact", head: true }).eq("event", "send_tap"),
+      supabaseAdmin.from("verify_events").select("*", { count: "exact", head: true }).eq("event", "verified"),
+      supabaseAdmin.from("verify_events").select("*", { count: "exact", head: true }).eq("event", "download"),
+    ]);
+
+    return {
+      today: { ...todayTotals, users: todayUsers.size },
+      last30: { ...totals, users: allUsers.size },
+      allTime: {
+        gate_shown: gAll.count ?? 0,
+        send_tap: sAll.count ?? 0,
+        verified: vAll.count ?? 0,
+        download: dAll.count ?? 0,
+      },
+      daily,
+    };
+  });
