@@ -2271,7 +2271,9 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         });
       }
 
+      const alreadyToday = await isVerifiedToday(uid);
       await markVerifiedToday(uid);
+      if (!alreadyToday) await logVerifyEvent(uid, "verified", m.id);
       return deliverGatedMovie(ctx, m, uid, chatId);
     }
 
