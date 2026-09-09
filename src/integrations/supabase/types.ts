@@ -527,6 +527,33 @@ export type Database = {
         }
         Relationships: []
       }
+      verify_events: {
+        Row: {
+          created_at: string
+          day: string
+          event: string
+          id: number
+          movie_id: number | null
+          user_id: number
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          event: string
+          id?: number
+          movie_id?: number | null
+          user_id: number
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          event?: string
+          id?: number
+          movie_id?: number | null
+          user_id?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
