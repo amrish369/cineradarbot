@@ -85,6 +85,7 @@ import {
   readUnlockToken,
   isVerifiedToday,
   markVerifiedToday,
+  logVerifyEvent,
 } from "./unlock.server";
 
 // ─── helpers ────────────────────────────────────────────────
@@ -155,6 +156,7 @@ async function sendVerifyGate(
     return;
   }
   await rememberUnlockToken(created.token, { movieId: movie.id, userId: uid });
+  await logVerifyEvent(uid, "gate_shown", movie.id);
 
   const kb = new InlineKeyboard()
     .url("🔓 Verify & Unlock", created.url)
@@ -193,6 +195,7 @@ async function deliverGatedMovie(
   chatId: number | string | undefined,
 ): Promise<any> {
   await logChat(uid, "bot", `[Download] ${m.title}`);
+  await logVerifyEvent(uid, "download", m.id);
   const caption = buildUserCaption(m as any, {
     escape: escapeMarkdown,
     footer: `⏱️ *Copyright Security: Yeh file 5 min mein auto-delete ho jayegi. Forward karke save karein.*\n\n📷 *Instagram par humein follow karein* — agar future me bot ya group ban ho jaye, to bhi aap hamse jude rahenge.`,
@@ -2239,6 +2242,7 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
 
     if (data.startsWith("send:")) {
       const token = data.slice("send:".length);
+      await logVerifyEvent(uid, "send_tap");
       const mapped = await readUnlockToken(token);
       if (!mapped) {
         return ctx.answerCallbackQuery({ text: "⌛ Link expire ho gaya — dobara search karein.", show_alert: true });
@@ -2267,7 +2271,9 @@ export function createBot(tokenOverride?: string, botId: number | null = null): 
         });
       }
 
+      const alreadyToday = await isVerifiedToday(uid);
       await markVerifiedToday(uid);
+      if (!alreadyToday) await logVerifyEvent(uid, "verified", m.id);
       return deliverGatedMovie(ctx, m, uid, chatId);
     }
 
