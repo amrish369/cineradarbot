@@ -156,6 +156,7 @@ async function sendVerifyGate(
     return;
   }
   await rememberUnlockToken(created.token, { movieId: movie.id, userId: uid });
+  await logVerifyEvent(uid, "gate_shown", movie.id);
 
   const kb = new InlineKeyboard()
     .url("🔓 Verify & Unlock", created.url)
