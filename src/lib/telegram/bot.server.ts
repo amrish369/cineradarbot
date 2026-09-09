@@ -235,7 +235,9 @@ async function deliverGatedMovie(
       parse_mode: "Markdown",
       reply_markup: await withBackupKb(kb, m.id),
     });
-    return ctx.answerCallbackQuery({ text: `📥 ${m.title} deliver ho rahi hai!` }).catch(() => {});
+    await notifyGroupRedirect(ctx, chatId, uid, m, "file");
+    return ctx.answerCallbackQuery({ text: `📥 ${m.title} aapke personal chat me bhej di!` }).catch(() => {});
+
   } catch (e) {
     const err = e as any;
     const desc = err?.description || err?.message || String(e);
