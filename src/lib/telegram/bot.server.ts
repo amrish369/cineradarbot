@@ -85,6 +85,7 @@ import {
   readUnlockToken,
   isVerifiedToday,
   markVerifiedToday,
+  logVerifyEvent,
 } from "./unlock.server";
 
 // ─── helpers ────────────────────────────────────────────────
