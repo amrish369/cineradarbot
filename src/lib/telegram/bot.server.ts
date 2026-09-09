@@ -140,8 +140,33 @@ async function sendMovieFile(api: any, chatId: number | string, movie: MovieRow,
   return api.sendVideo(chatId, movie.file_id, opts);
 }
 
+// ── Group → DM redirect notice ─────────────────────────────────
+async function notifyGroupRedirect(
+  ctx: any,
+  chatId: number | string | undefined,
+  uid: number,
+  movie: MovieRow,
+  kind: "verify" | "file",
+): Promise<void> {
+  if (!chatId || String(chatId) === String(uid)) return;
+  const type = ctx.chat?.type;
+  if (type && type === "private") return;
+  const kb = new InlineKeyboard().url(
+    "👉 Bot Chat Kholein",
+    `https://t.me/${meName(ctx)}?start=get_${movie.id}`,
+  );
+  const text =
+    kind === "verify"
+      ? `🔐 *${escapeMarkdown(movie.title)}*\n\n@${escapeMarkdown(ctx.from?.first_name || "User")} — verification link aapke *personal chat* me bhej diya hai.\nNeeche button dabakar bot ke chat me jayein 👇`
+      : `📩 *${escapeMarkdown(movie.title)}*\n\n@${escapeMarkdown(ctx.from?.first_name || "User")} — file aapke *personal chat* me bhej di hai.\nNeeche button dabakar bot ke chat me jayein 👇`;
+  await ctx.api
+    .sendMessage(chatId, text, { parse_mode: "Markdown", reply_markup: kb })
+    .catch(() => {});
+}
+
 // ── Ad-verify gate ─────────────────────────────────────────────
 async function sendVerifyGate(
+
   ctx: any,
   movie: MovieRow,
   uid: number,
@@ -171,7 +196,9 @@ async function sendVerifyGate(
 
   try {
     await ctx.api.sendMessage(uid, text, { parse_mode: "Markdown", reply_markup: kb });
+    await notifyGroupRedirect(ctx, chatId, uid, movie, "verify");
   } catch {
+
     // User hasn't started bot in DM → deep-link from group
     if (chatId) {
       const deepKb = new InlineKeyboard().url(
@@ -208,7 +235,9 @@ async function deliverGatedMovie(
       parse_mode: "Markdown",
       reply_markup: await withBackupKb(kb, m.id),
     });
-    return ctx.answerCallbackQuery({ text: `📥 ${m.title} deliver ho rahi hai!` }).catch(() => {});
+    await notifyGroupRedirect(ctx, chatId, uid, m, "file");
+    return ctx.answerCallbackQuery({ text: `📥 ${m.title} aapke personal chat me bhej di!` }).catch(() => {});
+
   } catch (e) {
     const err = e as any;
     const desc = err?.description || err?.message || String(e);
