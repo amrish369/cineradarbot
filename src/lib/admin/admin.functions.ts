@@ -605,6 +605,7 @@ export const updateBotSettings = createServerFn({ method: "POST" })
     main_group_link?: string | null;
     backup_group_link?: string | null;
     storage_channel_id?: number;
+    verify_gate_enabled?: boolean;
   }) => d)
   .handler(async ({ context, data }) => {
     const email = await assertAdmin(context.claims);

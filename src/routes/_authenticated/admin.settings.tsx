@@ -31,6 +31,7 @@ function SettingsPage() {
         main_group_link: s.main_group_link || null,
         backup_group_link: s.backup_group_link || null,
         storage_channel_id: Number(s.storage_channel_id),
+        verify_gate_enabled: s.verify_gate_enabled !== false,
       }});
       toast.success("Saved");
       refetch();
@@ -42,6 +43,20 @@ function SettingsPage() {
   return (
     <div className="space-y-6 max-w-2xl">
       <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
+
+      <Card className="p-5 space-y-4">
+        <h2 className="font-semibold">Website Verify gate</h2>
+        <div className="flex items-center justify-between">
+          <Label>Verify required before file</Label>
+          <Switch
+            checked={s.verify_gate_enabled !== false}
+            onCheckedChange={(v) => setS({ ...s, verify_gate_enabled: v })}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground">
+          On: user ko din me ek baar website par verify karna hoga. Off: file turant bina verify ke chali jayegi.
+        </p>
+      </Card>
 
       <Card className="p-5 space-y-4">
         <h2 className="font-semibold">Auto-delete</h2>
