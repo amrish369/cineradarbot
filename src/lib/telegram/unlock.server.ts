@@ -93,7 +93,20 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+/** Admin toggle: when off, no website verification is required at all. */
+export async function isVerifyGateEnabled(): Promise<boolean> {
+  const { data } = await supabaseAdmin
+    .from("bot_settings")
+    .select("value")
+    .eq("key", "verify_gate_enabled")
+    .maybeSingle();
+  const v = (data?.value as any) ?? null;
+  if (v === null || v === undefined) return true; // default ON
+  return v === true || v === "true";
+}
+
 export async function isVerifiedToday(userId: number): Promise<boolean> {
+  if (!(await isVerifyGateEnabled())) return true;
   const { data } = await supabaseAdmin
     .from("bot_settings")
     .select("value")
