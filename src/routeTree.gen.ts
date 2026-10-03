@@ -37,6 +37,7 @@ import { Route as ApiPublicHooksStorageScanRouteImport } from './routes/api/publ
 import { Route as ApiPublicHooksTmdbBackfillRouteImport } from './routes/api/public/hooks/tmdb-backfill'
 import { Route as ApiPublicTelegramRegisterRouteImport } from './routes/api/public/telegram/register'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
+import { Route as ApiPublicWorkerRequestsRouteImport } from './routes/api/public/worker/requests'
 import { Route as ApiPublicTelegramWebhookBotIdRouteImport } from './routes/api/public/telegram/webhook.$botId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -195,6 +196,11 @@ const ApiPublicTelegramWebhookRoute =
     path: '/api/public/telegram/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWorkerRequestsRoute = ApiPublicWorkerRequestsRouteImport.update({
+  id: '/api/public/worker/requests',
+  path: '/api/public/worker/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicTelegramWebhookBotIdRoute =
   ApiPublicTelegramWebhookBotIdRouteImport.update({
     id: '/$botId',
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
   '/api/public/telegram/register': typeof ApiPublicTelegramRegisterRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRouteWithChildren
+  '/api/public/worker/requests': typeof ApiPublicWorkerRequestsRoute
   '/api/public/telegram/webhook/$botId': typeof ApiPublicTelegramWebhookBotIdRoute
 }
 export interface FileRoutesByTo {
@@ -260,6 +267,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
   '/api/public/telegram/register': typeof ApiPublicTelegramRegisterRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRouteWithChildren
+  '/api/public/worker/requests': typeof ApiPublicWorkerRequestsRoute
   '/api/public/telegram/webhook/$botId': typeof ApiPublicTelegramWebhookBotIdRoute
 }
 export interface FileRoutesById {
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
   '/api/public/telegram/register': typeof ApiPublicTelegramRegisterRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRouteWithChildren
+  '/api/public/worker/requests': typeof ApiPublicWorkerRequestsRoute
   '/api/public/telegram/webhook/$botId': typeof ApiPublicTelegramWebhookBotIdRoute
 }
 export interface FileRouteTypes {
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/tmdb-backfill'
     | '/api/public/telegram/register'
     | '/api/public/telegram/webhook'
+    | '/api/public/worker/requests'
     | '/api/public/telegram/webhook/$botId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/tmdb-backfill'
     | '/api/public/telegram/register'
     | '/api/public/telegram/webhook'
+    | '/api/public/worker/requests'
     | '/api/public/telegram/webhook/$botId'
   id:
     | '__root__'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/tmdb-backfill'
     | '/api/public/telegram/register'
     | '/api/public/telegram/webhook'
+    | '/api/public/worker/requests'
     | '/api/public/telegram/webhook/$botId'
   fileRoutesById: FileRoutesById
 }
@@ -408,6 +420,7 @@ export interface RootRouteChildren {
   ApiPublicHooksTmdbBackfillRoute: typeof ApiPublicHooksTmdbBackfillRoute
   ApiPublicTelegramRegisterRoute: typeof ApiPublicTelegramRegisterRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRouteWithChildren
+  ApiPublicWorkerRequestsRoute: typeof ApiPublicWorkerRequestsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -608,6 +621,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/worker/requests': {
+      id: '/api/public/worker/requests'
+      path: '/api/public/worker/requests'
+      fullPath: '/api/public/worker/requests'
+      preLoaderRoute: typeof ApiPublicWorkerRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/telegram/webhook/$botId': {
       id: '/api/public/telegram/webhook/$botId'
       path: '/$botId'
@@ -681,6 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksTmdbBackfillRoute: ApiPublicHooksTmdbBackfillRoute,
   ApiPublicTelegramRegisterRoute: ApiPublicTelegramRegisterRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRouteWithChildren,
+  ApiPublicWorkerRequestsRoute: ApiPublicWorkerRequestsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
