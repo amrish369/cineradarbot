@@ -9,48 +9,40 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MoviesRouteImport } from './routes/movies'
-import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as MIdRouteImport } from './routes/m.$id'
-import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
-import { Route as AuthenticatedAdminBotsRouteImport } from './routes/_authenticated/admin.bots'
-import { Route as AuthenticatedAdminBroadcastRouteImport } from './routes/_authenticated/admin.broadcast'
-import { Route as AuthenticatedAdminMoviesRouteImport } from './routes/_authenticated/admin.movies'
-import { Route as AuthenticatedAdminRequestsRouteImport } from './routes/_authenticated/admin.requests'
-import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
-import { Route as AuthenticatedAdminStorageRouteImport } from './routes/_authenticated/admin.storage'
-import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
-import { Route as AuthenticatedAdminVerifyRouteImport } from './routes/_authenticated/admin.verify'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
-import { Route as ApiPublicDlIdRouteImport } from './routes/api/public/dl/$id'
-import { Route as ApiPublicHooksCleanupPayloadsRouteImport } from './routes/api/public/hooks/cleanup-payloads'
-import { Route as ApiPublicHooksGroupInviteRemindersRouteImport } from './routes/api/public/hooks/group-invite-reminders'
-import { Route as ApiPublicHooksMetadataBackfillRouteImport } from './routes/api/public/hooks/metadata-backfill'
-import { Route as ApiPublicHooksRunDeleteQueueRouteImport } from './routes/api/public/hooks/run-delete-queue'
-import { Route as ApiPublicHooksStorageScanRouteImport } from './routes/api/public/hooks/storage-scan'
-import { Route as ApiPublicHooksTmdbBackfillRouteImport } from './routes/api/public/hooks/tmdb-backfill'
-import { Route as ApiPublicTelegramRegisterRouteImport } from './routes/api/public/telegram/register'
+import { Route as AuthenticatedAdminVerifyRouteImport } from './routes/_authenticated/admin.verify'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
+import { Route as AuthenticatedAdminStorageRouteImport } from './routes/_authenticated/admin.storage'
+import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
+import { Route as AuthenticatedAdminRequestsRouteImport } from './routes/_authenticated/admin.requests'
+import { Route as AuthenticatedAdminMoviesRouteImport } from './routes/_authenticated/admin.movies'
+import { Route as AuthenticatedAdminBroadcastRouteImport } from './routes/_authenticated/admin.broadcast'
+import { Route as AuthenticatedAdminBotsRouteImport } from './routes/_authenticated/admin.bots'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as ApiPublicWorkerRequestsRouteImport } from './routes/api/public/worker/requests'
 import { Route as ApiPublicTelegramWebhookRouteImport } from './routes/api/public/telegram/webhook'
+import { Route as ApiPublicTelegramRegisterRouteImport } from './routes/api/public/telegram/register'
+import { Route as ApiPublicHooksTmdbBackfillRouteImport } from './routes/api/public/hooks/tmdb-backfill'
+import { Route as ApiPublicHooksStorageScanRouteImport } from './routes/api/public/hooks/storage-scan'
+import { Route as ApiPublicHooksRunDeleteQueueRouteImport } from './routes/api/public/hooks/run-delete-queue'
+import { Route as ApiPublicHooksMetadataBackfillRouteImport } from './routes/api/public/hooks/metadata-backfill'
+import { Route as ApiPublicHooksGroupInviteRemindersRouteImport } from './routes/api/public/hooks/group-invite-reminders'
+import { Route as ApiPublicHooksCleanupPayloadsRouteImport } from './routes/api/public/hooks/cleanup-payloads'
+import { Route as ApiPublicDlIdRouteImport } from './routes/api/public/dl/$id'
 import { Route as ApiPublicTelegramWebhookBotIdRouteImport } from './routes/api/public/telegram/webhook.$botId'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
-  id: '/_authenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
+const MoviesRoute = MoviesRouteImport.update({
+  id: '/movies',
+  path: '/movies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const McpRoute = McpRouteImport.update({
@@ -58,32 +50,35 @@ const McpRoute = McpRouteImport.update({
   path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MoviesRoute = MoviesRouteImport.update({
-  id: '/movies',
-  path: '/movies',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotmcpChar93ListToolsRoute =
-  Char91DotmcpChar93ListToolsRouteImport.update({
-    id: '/.mcp/list-tools',
-    path: '/.mcp/list-tools',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MIdRoute = MIdRouteImport.update({
+  id: '/m/$id',
+  path: '/m/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
-const MIdRoute = MIdRouteImport.update({
-  id: '/m/$id',
-  path: '/m/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Char91DotmcpChar93InvokeToolToolRoute =
-  Char91DotmcpChar93InvokeToolToolRouteImport.update({
-    id: '/.mcp/invoke-tool/$tool',
-    path: '/.mcp/invoke-tool/$tool',
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
@@ -91,27 +86,26 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminBotsRoute = AuthenticatedAdminBotsRouteImport.update({
-  id: '/admin/bots',
-  path: '/admin/bots',
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminVerifyRoute =
+  AuthenticatedAdminVerifyRouteImport.update({
+    id: '/admin/verify',
+    path: '/admin/verify',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/admin/users',
+  path: '/admin/users',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminBroadcastRoute =
-  AuthenticatedAdminBroadcastRouteImport.update({
-    id: '/admin/broadcast',
-    path: '/admin/broadcast',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminMoviesRoute =
-  AuthenticatedAdminMoviesRouteImport.update({
-    id: '/admin/movies',
-    path: '/admin/movies',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedAdminRequestsRoute =
-  AuthenticatedAdminRequestsRouteImport.update({
-    id: '/admin/requests',
-    path: '/admin/requests',
+const AuthenticatedAdminStorageRoute =
+  AuthenticatedAdminStorageRouteImport.update({
+    id: '/admin/storage',
+    path: '/admin/storage',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedAdminSettingsRoute =
@@ -120,67 +114,44 @@ const AuthenticatedAdminSettingsRoute =
     path: '/admin/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminStorageRoute =
-  AuthenticatedAdminStorageRouteImport.update({
-    id: '/admin/storage',
-    path: '/admin/storage',
+const AuthenticatedAdminRequestsRoute =
+  AuthenticatedAdminRequestsRouteImport.update({
+    id: '/admin/requests',
+    path: '/admin/requests',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
+const AuthenticatedAdminMoviesRoute =
+  AuthenticatedAdminMoviesRouteImport.update({
+    id: '/admin/movies',
+    path: '/admin/movies',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminBroadcastRoute =
+  AuthenticatedAdminBroadcastRouteImport.update({
+    id: '/admin/broadcast',
+    path: '/admin/broadcast',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedAdminBotsRoute = AuthenticatedAdminBotsRouteImport.update({
+  id: '/admin/bots',
+  path: '/admin/bots',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAdminVerifyRoute =
-  AuthenticatedAdminVerifyRouteImport.update({
-    id: '/admin/verify',
-    path: '/admin/verify',
-    getParentRoute: () => AuthenticatedRouteRoute,
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
-  id: '/api/public/health',
-  path: '/api/public/health',
+const ApiPublicWorkerRequestsRoute = ApiPublicWorkerRequestsRouteImport.update({
+  id: '/api/public/worker/requests',
+  path: '/api/public/worker/requests',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicDlIdRoute = ApiPublicDlIdRouteImport.update({
-  id: '/api/public/dl/$id',
-  path: '/api/public/dl/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicHooksCleanupPayloadsRoute =
-  ApiPublicHooksCleanupPayloadsRouteImport.update({
-    id: '/api/public/hooks/cleanup-payloads',
-    path: '/api/public/hooks/cleanup-payloads',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksGroupInviteRemindersRoute =
-  ApiPublicHooksGroupInviteRemindersRouteImport.update({
-    id: '/api/public/hooks/group-invite-reminders',
-    path: '/api/public/hooks/group-invite-reminders',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksMetadataBackfillRoute =
-  ApiPublicHooksMetadataBackfillRouteImport.update({
-    id: '/api/public/hooks/metadata-backfill',
-    path: '/api/public/hooks/metadata-backfill',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksRunDeleteQueueRoute =
-  ApiPublicHooksRunDeleteQueueRouteImport.update({
-    id: '/api/public/hooks/run-delete-queue',
-    path: '/api/public/hooks/run-delete-queue',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksStorageScanRoute =
-  ApiPublicHooksStorageScanRouteImport.update({
-    id: '/api/public/hooks/storage-scan',
-    path: '/api/public/hooks/storage-scan',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicHooksTmdbBackfillRoute =
-  ApiPublicHooksTmdbBackfillRouteImport.update({
-    id: '/api/public/hooks/tmdb-backfill',
-    path: '/api/public/hooks/tmdb-backfill',
+const ApiPublicTelegramWebhookRoute =
+  ApiPublicTelegramWebhookRouteImport.update({
+    id: '/api/public/telegram/webhook',
+    path: '/api/public/telegram/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicTelegramRegisterRoute =
@@ -189,12 +160,47 @@ const ApiPublicTelegramRegisterRoute =
     path: '/api/public/telegram/register',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicTelegramWebhookRoute =
-  ApiPublicTelegramWebhookRouteImport.update({
-    id: '/api/public/telegram/webhook',
-    path: '/api/public/telegram/webhook',
+const ApiPublicHooksTmdbBackfillRoute =
+  ApiPublicHooksTmdbBackfillRouteImport.update({
+    id: '/api/public/hooks/tmdb-backfill',
+    path: '/api/public/hooks/tmdb-backfill',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksStorageScanRoute =
+  ApiPublicHooksStorageScanRouteImport.update({
+    id: '/api/public/hooks/storage-scan',
+    path: '/api/public/hooks/storage-scan',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksRunDeleteQueueRoute =
+  ApiPublicHooksRunDeleteQueueRouteImport.update({
+    id: '/api/public/hooks/run-delete-queue',
+    path: '/api/public/hooks/run-delete-queue',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksMetadataBackfillRoute =
+  ApiPublicHooksMetadataBackfillRouteImport.update({
+    id: '/api/public/hooks/metadata-backfill',
+    path: '/api/public/hooks/metadata-backfill',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksGroupInviteRemindersRoute =
+  ApiPublicHooksGroupInviteRemindersRouteImport.update({
+    id: '/api/public/hooks/group-invite-reminders',
+    path: '/api/public/hooks/group-invite-reminders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksCleanupPayloadsRoute =
+  ApiPublicHooksCleanupPayloadsRouteImport.update({
+    id: '/api/public/hooks/cleanup-payloads',
+    path: '/api/public/hooks/cleanup-payloads',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicDlIdRoute = ApiPublicDlIdRouteImport.update({
+  id: '/api/public/dl/$id',
+  path: '/api/public/dl/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicTelegramWebhookBotIdRoute =
   ApiPublicTelegramWebhookBotIdRouteImport.update({
     id: '/$botId',
@@ -230,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
   '/api/public/telegram/register': typeof ApiPublicTelegramRegisterRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRouteWithChildren
+  '/api/public/worker/requests': typeof ApiPublicWorkerRequestsRoute
   '/api/public/telegram/webhook/$botId': typeof ApiPublicTelegramWebhookBotIdRoute
 }
 export interface FileRoutesByTo {
@@ -260,6 +267,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
   '/api/public/telegram/register': typeof ApiPublicTelegramRegisterRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRouteWithChildren
+  '/api/public/worker/requests': typeof ApiPublicWorkerRequestsRoute
   '/api/public/telegram/webhook/$botId': typeof ApiPublicTelegramWebhookBotIdRoute
 }
 export interface FileRoutesById {
@@ -292,6 +300,7 @@ export interface FileRoutesById {
   '/api/public/hooks/tmdb-backfill': typeof ApiPublicHooksTmdbBackfillRoute
   '/api/public/telegram/register': typeof ApiPublicTelegramRegisterRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRouteWithChildren
+  '/api/public/worker/requests': typeof ApiPublicWorkerRequestsRoute
   '/api/public/telegram/webhook/$botId': typeof ApiPublicTelegramWebhookBotIdRoute
 }
 export interface FileRouteTypes {
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/tmdb-backfill'
     | '/api/public/telegram/register'
     | '/api/public/telegram/webhook'
+    | '/api/public/worker/requests'
     | '/api/public/telegram/webhook/$botId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -354,6 +364,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/tmdb-backfill'
     | '/api/public/telegram/register'
     | '/api/public/telegram/webhook'
+    | '/api/public/worker/requests'
     | '/api/public/telegram/webhook/$botId'
   id:
     | '__root__'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/tmdb-backfill'
     | '/api/public/telegram/register'
     | '/api/public/telegram/webhook'
+    | '/api/public/worker/requests'
     | '/api/public/telegram/webhook/$botId'
   fileRoutesById: FileRoutesById
 }
@@ -408,29 +420,16 @@ export interface RootRouteChildren {
   ApiPublicHooksTmdbBackfillRoute: typeof ApiPublicHooksTmdbBackfillRoute
   ApiPublicTelegramRegisterRoute: typeof ApiPublicTelegramRegisterRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRouteWithChildren
+  ApiPublicWorkerRequestsRoute: typeof ApiPublicWorkerRequestsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated': {
-      id: '/_authenticated'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+    '/movies': {
+      id: '/movies'
+      path: '/movies'
+      fullPath: '/movies'
+      preLoaderRoute: typeof MoviesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mcp': {
@@ -440,25 +439,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/movies': {
-      id: '/movies'
-      path: '/movies'
-      fullPath: '/movies'
-      preLoaderRoute: typeof MoviesRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.mcp/list-tools': {
-      id: '/.mcp/list-tools'
-      path: '/.mcp/list-tools'
-      fullPath: '/.mcp/list-tools'
-      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/m/$id': {
@@ -468,11 +467,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/.mcp/invoke-tool/$tool': {
-      id: '/.mcp/invoke-tool/$tool'
-      path: '/.mcp/invoke-tool/$tool'
-      fullPath: '/.mcp/invoke-tool/$tool'
-      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
@@ -482,46 +488,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin/bots': {
-      id: '/_authenticated/admin/bots'
-      path: '/admin/bots'
-      fullPath: '/admin/bots'
-      preLoaderRoute: typeof AuthenticatedAdminBotsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin/broadcast': {
-      id: '/_authenticated/admin/broadcast'
-      path: '/admin/broadcast'
-      fullPath: '/admin/broadcast'
-      preLoaderRoute: typeof AuthenticatedAdminBroadcastRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/movies': {
-      id: '/_authenticated/admin/movies'
-      path: '/admin/movies'
-      fullPath: '/admin/movies'
-      preLoaderRoute: typeof AuthenticatedAdminMoviesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/requests': {
-      id: '/_authenticated/admin/requests'
-      path: '/admin/requests'
-      fullPath: '/admin/requests'
-      preLoaderRoute: typeof AuthenticatedAdminRequestsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/settings': {
-      id: '/_authenticated/admin/settings'
-      path: '/admin/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/admin/storage': {
-      id: '/_authenticated/admin/storage'
-      path: '/admin/storage'
-      fullPath: '/admin/storage'
-      preLoaderRoute: typeof AuthenticatedAdminStorageRouteImport
+    '/_authenticated/admin/verify': {
+      id: '/_authenticated/admin/verify'
+      path: '/admin/verify'
+      fullPath: '/admin/verify'
+      preLoaderRoute: typeof AuthenticatedAdminVerifyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin/users': {
@@ -531,67 +509,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/admin/verify': {
-      id: '/_authenticated/admin/verify'
-      path: '/admin/verify'
-      fullPath: '/admin/verify'
-      preLoaderRoute: typeof AuthenticatedAdminVerifyRouteImport
+    '/_authenticated/admin/storage': {
+      id: '/_authenticated/admin/storage'
+      path: '/admin/storage'
+      fullPath: '/admin/storage'
+      preLoaderRoute: typeof AuthenticatedAdminStorageRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/public/health': {
-      id: '/api/public/health'
-      path: '/api/public/health'
-      fullPath: '/api/public/health'
-      preLoaderRoute: typeof ApiPublicHealthRouteImport
+    '/_authenticated/admin/settings': {
+      id: '/_authenticated/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/requests': {
+      id: '/_authenticated/admin/requests'
+      path: '/admin/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AuthenticatedAdminRequestsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/movies': {
+      id: '/_authenticated/admin/movies'
+      path: '/admin/movies'
+      fullPath: '/admin/movies'
+      preLoaderRoute: typeof AuthenticatedAdminMoviesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/broadcast': {
+      id: '/_authenticated/admin/broadcast'
+      path: '/admin/broadcast'
+      fullPath: '/admin/broadcast'
+      preLoaderRoute: typeof AuthenticatedAdminBroadcastRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/bots': {
+      id: '/_authenticated/admin/bots'
+      path: '/admin/bots'
+      fullPath: '/admin/bots'
+      preLoaderRoute: typeof AuthenticatedAdminBotsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/dl/$id': {
-      id: '/api/public/dl/$id'
-      path: '/api/public/dl/$id'
-      fullPath: '/api/public/dl/$id'
-      preLoaderRoute: typeof ApiPublicDlIdRouteImport
+    '/api/public/worker/requests': {
+      id: '/api/public/worker/requests'
+      path: '/api/public/worker/requests'
+      fullPath: '/api/public/worker/requests'
+      preLoaderRoute: typeof ApiPublicWorkerRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/hooks/cleanup-payloads': {
-      id: '/api/public/hooks/cleanup-payloads'
-      path: '/api/public/hooks/cleanup-payloads'
-      fullPath: '/api/public/hooks/cleanup-payloads'
-      preLoaderRoute: typeof ApiPublicHooksCleanupPayloadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/group-invite-reminders': {
-      id: '/api/public/hooks/group-invite-reminders'
-      path: '/api/public/hooks/group-invite-reminders'
-      fullPath: '/api/public/hooks/group-invite-reminders'
-      preLoaderRoute: typeof ApiPublicHooksGroupInviteRemindersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/metadata-backfill': {
-      id: '/api/public/hooks/metadata-backfill'
-      path: '/api/public/hooks/metadata-backfill'
-      fullPath: '/api/public/hooks/metadata-backfill'
-      preLoaderRoute: typeof ApiPublicHooksMetadataBackfillRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/run-delete-queue': {
-      id: '/api/public/hooks/run-delete-queue'
-      path: '/api/public/hooks/run-delete-queue'
-      fullPath: '/api/public/hooks/run-delete-queue'
-      preLoaderRoute: typeof ApiPublicHooksRunDeleteQueueRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/storage-scan': {
-      id: '/api/public/hooks/storage-scan'
-      path: '/api/public/hooks/storage-scan'
-      fullPath: '/api/public/hooks/storage-scan'
-      preLoaderRoute: typeof ApiPublicHooksStorageScanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/hooks/tmdb-backfill': {
-      id: '/api/public/hooks/tmdb-backfill'
-      path: '/api/public/hooks/tmdb-backfill'
-      fullPath: '/api/public/hooks/tmdb-backfill'
-      preLoaderRoute: typeof ApiPublicHooksTmdbBackfillRouteImport
+    '/api/public/telegram/webhook': {
+      id: '/api/public/telegram/webhook'
+      path: '/api/public/telegram/webhook'
+      fullPath: '/api/public/telegram/webhook'
+      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/telegram/register': {
@@ -601,11 +579,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicTelegramRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/telegram/webhook': {
-      id: '/api/public/telegram/webhook'
-      path: '/api/public/telegram/webhook'
-      fullPath: '/api/public/telegram/webhook'
-      preLoaderRoute: typeof ApiPublicTelegramWebhookRouteImport
+    '/api/public/hooks/tmdb-backfill': {
+      id: '/api/public/hooks/tmdb-backfill'
+      path: '/api/public/hooks/tmdb-backfill'
+      fullPath: '/api/public/hooks/tmdb-backfill'
+      preLoaderRoute: typeof ApiPublicHooksTmdbBackfillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/storage-scan': {
+      id: '/api/public/hooks/storage-scan'
+      path: '/api/public/hooks/storage-scan'
+      fullPath: '/api/public/hooks/storage-scan'
+      preLoaderRoute: typeof ApiPublicHooksStorageScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/run-delete-queue': {
+      id: '/api/public/hooks/run-delete-queue'
+      path: '/api/public/hooks/run-delete-queue'
+      fullPath: '/api/public/hooks/run-delete-queue'
+      preLoaderRoute: typeof ApiPublicHooksRunDeleteQueueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/metadata-backfill': {
+      id: '/api/public/hooks/metadata-backfill'
+      path: '/api/public/hooks/metadata-backfill'
+      fullPath: '/api/public/hooks/metadata-backfill'
+      preLoaderRoute: typeof ApiPublicHooksMetadataBackfillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/group-invite-reminders': {
+      id: '/api/public/hooks/group-invite-reminders'
+      path: '/api/public/hooks/group-invite-reminders'
+      fullPath: '/api/public/hooks/group-invite-reminders'
+      preLoaderRoute: typeof ApiPublicHooksGroupInviteRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/cleanup-payloads': {
+      id: '/api/public/hooks/cleanup-payloads'
+      path: '/api/public/hooks/cleanup-payloads'
+      fullPath: '/api/public/hooks/cleanup-payloads'
+      preLoaderRoute: typeof ApiPublicHooksCleanupPayloadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/dl/$id': {
+      id: '/api/public/dl/$id'
+      path: '/api/public/dl/$id'
+      fullPath: '/api/public/dl/$id'
+      preLoaderRoute: typeof ApiPublicDlIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/telegram/webhook/$botId': {
@@ -681,6 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksTmdbBackfillRoute: ApiPublicHooksTmdbBackfillRoute,
   ApiPublicTelegramRegisterRoute: ApiPublicTelegramRegisterRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRouteWithChildren,
+  ApiPublicWorkerRequestsRoute: ApiPublicWorkerRequestsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
