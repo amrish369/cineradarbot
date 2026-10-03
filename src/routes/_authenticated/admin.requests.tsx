@@ -37,9 +37,14 @@ function RequestsPage() {
                 </td>
                 <td className="p-2 text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()}</td>
                 <td className="p-2 text-right">
-                  {r.status !== "fulfilled" && (
+                  {(
                     <Button size="sm" variant="outline" onClick={async () => {
-                      try { await fulfill({ data: { id: r.id } }); toast.success("Marked fulfilled"); qc.invalidateQueries({ queryKey: ["admin", "requests"] }); }
+                      try {
+                        const res: any = await fulfill({ data: { id: r.id } });
+                        if (res?.delivery?.delivered) toast.success("File user ko bhej di ✅");
+                        else toast.warning(`Fulfilled, lekin file nahi gayi: ${res?.delivery?.reason ?? "unknown"}`);
+                        qc.invalidateQueries({ queryKey: ["admin", "requests"] });
+                      }
                       catch (e) { toast.error((e as Error).message); }
                     }}><Check className="h-4 w-4 mr-1" />Mark done</Button>
                   )}

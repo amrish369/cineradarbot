@@ -50,6 +50,12 @@ export const Route = createFileRoute("/api/public/worker/requests")({
             : { status: "failed" };
         const { error } = await supabaseAdmin.from("requests").update(update).eq("id", parsed.id);
         if (error) return Response.json({ error: error.message }, { status: 500 });
+        if (parsed.status === "fulfilled") {
+          const { deliverRequest } = await import("@/lib/telegram/request-delivery.server");
+          // Storage-channel auto-index may take a few seconds — wait up to 25s.
+          const delivery = await deliverRequest(parsed.id, { waitMs: 25000 });
+          return Response.json({ ok: true, delivery });
+        }
         return Response.json({ ok: true });
       },
     },
