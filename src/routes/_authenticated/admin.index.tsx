@@ -4,9 +4,18 @@ import { useServerFn } from "@tanstack/react-start";
 import { getDashboardStats, listActivity } from "@/lib/admin/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Film, Users, UserCheck, UserX, Inbox, Bot, Archive } from "lucide-react";
+import { ContentDemand } from "@/components/admin/content-demand";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: Dashboard,
+  head: () => ({ meta: [
+    { title: "Dashboard & Content Demand | CineRadar Bot" },
+    { name: "description", content: "Monitor CineRadar bot activity, movie requests and content demand." },
+    { property: "og:title", content: "CineRadar Bot Dashboard" },
+    { property: "og:description", content: "Bot activity, pending movie requests and content demand in one dashboard." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
 });
 
 function Stat({ icon: Icon, label, value }: any) {
@@ -42,6 +51,8 @@ function Dashboard() {
         <Stat icon={Inbox} label="Pending requests" value={s?.pendingRequests ?? "—"} />
         <Stat icon={Bot} label="Bots configured" value={s?.totalBots ?? "—"} />
       </div>
+
+      <ContentDemand />
 
       <Card className="p-4">
         <h2 className="font-semibold mb-3">Recent broadcasts</h2>
