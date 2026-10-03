@@ -680,7 +680,9 @@ export const fulfillRequestAdmin = createServerFn({ method: "POST" })
     }).eq("id", data.id);
     const { logActivity } = await import("./admin.server");
     await logActivity(email, "request.fulfill", { id: data.id });
-    return { ok: true };
+    const { deliverRequest } = await import("@/lib/telegram/request-delivery.server");
+    const delivery = await deliverRequest(data.id);
+    return { ok: true, delivery };
   });
 
 // ─── Manually drain delete queue (for testing) ────────────
