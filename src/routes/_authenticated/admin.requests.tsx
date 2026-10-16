@@ -46,7 +46,7 @@ function RequestsPage() {
                         qc.invalidateQueries({ queryKey: ["admin", "requests"] });
                       }
                       catch (e) { toast.error((e as Error).message); }
-                    }}><Check className="h-4 w-4 mr-1" />Mark done</Button>
+                    }}><Check className="h-4 w-4 mr-1" />{r.status === "fulfilled" ? "Resend file" : "Mark done & send"}</Button>
                   )}
                 </td>
               </tr>
