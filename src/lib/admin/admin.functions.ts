@@ -45,7 +45,7 @@ export const getDashboardStats = createServerFn({ method: "GET" })
 // ─── Movies ──────────────────────────────────────────────────
 export const listMovies = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { search?: string; limit?: number; offset?: number }) => d)
+  .inputValidator((d: { search?: string; limit?: number; offset?: number; unmatched?: boolean }) => d)
   .handler(async ({ context, data }) => {
     await assertAdmin(context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -54,6 +54,7 @@ export const listMovies = createServerFn({ method: "POST" })
     let q = supabaseAdmin.from("movies").select("*", { count: "exact" })
       .order("id", { ascending: false }).range(offset, offset + limit - 1);
     if (data.search) q = q.ilike("title", `%${data.search}%`);
+    if (data.unmatched) q = q.or("tmdb_verified.is.null,tmdb_verified.eq.false");
     const { data: rows, count, error } = await q;
     if (error) throw new Error(error.message);
     return { rows: rows ?? [], total: count ?? 0 };
@@ -905,4 +906,42 @@ export const getVerifyStats = createServerFn({ method: "GET" })
       },
       daily,
     };
+  });
+
+// ─── Manual TMDB match ────────────────────────────────────────
+export const searchTmdbOptions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { query?: string; movieId?: number }) => d)
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.claims);
+    const { tmdbSearchOptions, cleanForMatch } = await import("@/lib/telegram/tmdb.server");
+    let q = data.query?.trim() ?? "";
+    if (!q && data.movieId) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: m } = await supabaseAdmin.from("movies").select("title").eq("id", data.movieId).maybeSingle();
+      q = cleanForMatch(m?.title ?? "");
+    }
+    let options = await tmdbSearchOptions(q);
+    if (!options.length && !data.query) {
+      const short = q.split(" ").slice(0, 2).join(" ");
+      if (short && short !== q) { options = await tmdbSearchOptions(short); q = short; }
+    }
+    return { query: q, options };
+  });
+
+export const applyTmdbMatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: number; tmdbId: number; kind: "Movie" | "TV" }) => d)
+  .handler(async ({ context, data }) => {
+    const email = await assertAdmin(context.claims);
+    const { tmdbDetailById } = await import("@/lib/telegram/tmdb.server");
+    const det = await tmdbDetailById(data.tmdbId, data.kind);
+    if (!det) throw new Error("TMDB detail not found");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const search_text = [det.title, det.original_title, det.year].filter(Boolean).join(" ").toLowerCase();
+    const { error } = await supabaseAdmin.from("movies").update({ ...det, search_text, tmdb_verified: true } as any).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    const { logActivity } = await import("./admin.server");
+    await logActivity(email, "movie.tmdb_match", { id: data.id, tmdbId: data.tmdbId });
+    return { ok: true, title: det.title, year: det.year };
   });

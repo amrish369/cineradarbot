@@ -266,3 +266,54 @@ export async function getIndianMoviesByType(type: "new" | "upcoming" = "new", co
   }
   return out;
 }
+// ── Admin manual match helpers ────────────────────────────────
+export interface TMDBOption {
+  tmdbId: number;
+  kind: "Movie" | "TV";
+  title: string;
+  year: string | null;
+  poster: string | null;
+  overview: string;
+}
+
+export async function tmdbSearchOptions(query: string, max = 8): Promise<TMDBOption[]> {
+  const q = query.replace(/[._]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!q) return [];
+  const p = { query: q, language: "en-US", include_adult: false };
+  const [m, t] = await Promise.all([tmdbGet<any>("/search/movie", p), tmdbGet<any>("/search/tv", p)]);
+  const all: (TMDBOption & { pop: number })[] = [];
+  for (const r of m?.results ?? []) all.push({ tmdbId: r.id, kind: "Movie", title: r.title, year: r.release_date?.slice(0, 4) || null, poster: r.poster_path ? `${TMDB_IMG}${r.poster_path}` : null, overview: r.overview || "", pop: r.popularity ?? 0 });
+  for (const r of t?.results ?? []) all.push({ tmdbId: r.id, kind: "TV", title: r.name, year: r.first_air_date?.slice(0, 4) || null, poster: r.poster_path ? `${TMDB_IMG}${r.poster_path}` : null, overview: r.overview || "", pop: r.popularity ?? 0 });
+  all.sort((a, b) => b.pop - a.pop);
+  return all.slice(0, max).map(({ pop, ...o }) => o);
+}
+
+export async function tmdbDetailById(id: number, kind: "Movie" | "TV") {
+  const d = await tmdbGet<any>(kind === "Movie" ? `/movie/${id}` : `/tv/${id}`, { language: "en-US", append_to_response: "external_ids" });
+  if (!d) return null;
+  const isMovie = kind === "Movie";
+  const release = isMovie ? d.release_date : d.first_air_date;
+  return {
+    tmdb_id: id,
+    media_type: kind,
+    imdb_id: d.external_ids?.imdb_id ?? d.imdb_id ?? null,
+    title: isMovie ? d.title : d.name,
+    original_title: isMovie ? d.original_title : d.original_name,
+    year: release ? Number(release.slice(0, 4)) : null,
+    overview: d.overview || null,
+    genres: d.genres?.map((g: any) => g.name).join(", ") || null,
+    poster_url: d.poster_path ? `${TMDB_IMG}${d.poster_path}` : null,
+    backdrop_url: d.backdrop_path ? `https://image.tmdb.org/t/p/w1280${d.backdrop_path}` : null,
+    runtime: isMovie ? d.runtime ?? null : d.episode_run_time?.[0] ?? null,
+  };
+}
+
+/** Strip common junk so suggestions work on dirty titles. */
+export function cleanForMatch(s: string): string {
+  return (s || "")
+    .replace(/use vlc player.*$/i, "")
+    .replace(/[\[\](){}]/g, " ")
+    .replace(/\b(HDTC|HDCAM|CAM|HDTS|TS|Line|V\d|AAC\d?\s?\d?|DS4K|DD\d?|x26[45]|HEVC|WEB-?DL|WEBRip|HDRip|BluRay|\d{3,4}p|ESub|Hindi|Tamil|Telugu|Dual Audio)\b/gi, " ")
+    .replace(/@\w+/g, " ").replace(/https?:\S+/g, " ")
+    .replace(/\s+/g, " ").trim();
+}
