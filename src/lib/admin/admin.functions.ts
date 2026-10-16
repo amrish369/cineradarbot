@@ -945,3 +945,12 @@ export const applyTmdbMatch = createServerFn({ method: "POST" })
     await logActivity(email, "movie.tmdb_match", { id: data.id, tmdbId: data.tmdbId });
     return { ok: true, title: det.title, year: det.year };
   });
+
+export const autoMatchTmdbBatch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { afterId?: number; batch?: number }) => d)
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context.claims);
+    const { autoMatchBatch } = await import("@/lib/telegram/automatch.server");
+    return await autoMatchBatch(Math.max(0, data.afterId ?? 0), Math.min(15, Math.max(1, data.batch ?? 10)));
+  });
