@@ -90,6 +90,7 @@ function MoviesPage() {
         <Button size="sm" variant={unmatched ? "default" : "outline"} onClick={() => { setUnmatched(!unmatched); setOffset(0); }}>
           ⚠️ {unmatched ? "Showing unmatched" : "Show unmatched only"}
         </Button>
+        <AutoMatchButton onDone={() => qc.invalidateQueries({ queryKey: ["admin", "movies"] })} />
       </div>
 
       <Card className="overflow-x-auto">
