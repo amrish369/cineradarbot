@@ -37,15 +37,18 @@ export interface MovieRow {
 
 export async function fetchAllMovies(): Promise<MovieRow[]> {
   let allMovies: MovieRow[] = [];
-  let from = 0;
+  let lastId = 0;
   const size = 1000;
 
   while (true) {
     const { data, error } = await supabaseAdmin
       .from("movies")
-      .select("*")
+      .select(
+        "id,title,language,quality,year,file_size,tmdb_id,imdb_id,original_title,tmdb_verified,content_kind,season,episode_start,episode_end,is_combined,storage_message_id,aliases,search_text",
+      )
+      .gt("id", lastId)
       .order("id", { ascending: true })
-      .range(from, from + size - 1);
+      .limit(size);
 
     if (error) {
       console.error("[DB] fetchAllMovies", error.message);
@@ -54,11 +57,12 @@ export async function fetchAllMovies(): Promise<MovieRow[]> {
 
     if (!data || data.length === 0) break;
 
-    allMovies = allMovies.concat(data as MovieRow[]);
+    allMovies = allMovies.concat(data as unknown as MovieRow[]);
 
     if (data.length < size) break;
 
-    from += size;
+    lastId = Number(data[data.length - 1]?.id ?? lastId);
+    if (lastId <= 0) break;
   }
 
   return allMovies;
