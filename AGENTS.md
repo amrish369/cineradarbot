@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep dashboard content-demand presentation separate from Telegram search tracking; reuse existing request reads so UI-only updates do not alter bot behavior or database schema.
+- Telegram whole-catalog reads must use a minimal search/display projection and ID-cursor pagination; keep the existing in-memory matching and ranking behavior unchanged.
