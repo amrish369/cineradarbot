@@ -51,7 +51,8 @@ export const listMovies = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const limit = Math.min(data.limit ?? 50, 200);
     const offset = data.offset ?? 0;
-    let q = supabaseAdmin.from("movies").select("*", { count: "exact" })
+    let q = supabaseAdmin.from("movies")
+      .select("id,title,quality,language,year,storage_message_id,tmdb_verified,type", { count: "exact" })
       .order("id", { ascending: false }).range(offset, offset + limit - 1);
     if (data.search) q = q.ilike("title", `%${data.search}%`);
     if (data.unmatched) q = q.or("tmdb_verified.is.null,tmdb_verified.eq.false");
